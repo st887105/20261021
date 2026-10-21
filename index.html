@@ -157,7 +157,10 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:0 16px 30px;p
 .vstage.grab{cursor:grab}.vstage.grabbing{cursor:grabbing}
 .vmsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px;color:var(--muted);z-index:2;pointer-events:none}
 .vmsg .btn,.vmsg a{pointer-events:auto}
-.vmsg .ti{font-size:46px}
+.vmsg>.ti{font-size:46px}
+.vmsg .btn{white-space:nowrap;min-height:44px}
+.vmsg .btn .ti{font-size:18px}
+.vmsg small{max-width:340px;line-height:1.6}
 .vmsg p{margin:0;color:var(--text)}
 .spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -438,7 +441,7 @@ const CONFIG = {
   videoProxy: 'https://pcloud-video.sunny-f0b.workers.dev',
   // 不顯示的檔案與資料夾
   exclude: /\.(txt|nfo|url|db|ini|ds_store|rar|zip|7z|torrent|srt|ass|ssa|jpg|jpeg|png|gif|webp|bmp)$/i,
-  hide: /性愛|自拍|破解|流出|外流|偷拍|偷窺|私密影|^待你處理$|^重複備份$/i,
+  hide: /性愛|自拍|破解|流出|外流|偷拍|偷窺|私密影|艷照|艳照|edc|陳冠希|獸獸|兽兽|做愛|做爱|小旅館|^待你處理$|^重複備份$/i,
   // 國家 → 地區（依資料夾名稱自動判斷，可自行增加）
   countries: [
     ['中港台', '華語', /中港台|港台|華語|华语/],
@@ -471,7 +474,7 @@ const CONFIG = {
   // 固定的分類對照：'資料夾名稱': '地區/國家'。網頁上改過後可用選單「匯出對照」貼到這裡
   catOverrides: {},
   inbox: /^待整理/,
-  version: 'v1.0.1',
+  version: 'v1.0.3',
   updated: '2026-10-21'
 };
 
@@ -1089,10 +1092,11 @@ function setSource(k, keepTime) {
     if (at) { vid.currentTime = at; if (keepTime == null && t == null) toast(`從 ${fmtTime(at)} 繼續播放`); }
     vid.playbackRate = +(store('rate') || 1);
   }, { once: true });
-  vid.play().catch(() => { $('#bigplay').hidden = false; });
+  vid.play().catch(() => { if (!$('#vmsg .btn')) $('#bigplay').hidden = false; });
 }
 async function onVideoError() {
   if (!P.c || !vid.getAttribute('src')) return;
+  if (/\.(rmvb|rm)$/i.test(P.c.f.name)) return failMsg('網頁無法播放 RMVB 格式');
   const t = vid.currentTime || P.startAt;
   // 換下一個來源：直連 → 轉碼 → Worker 中轉串流
   if (P.si + 1 < P.srcs.length) return setSource(P.si + 1, t);
@@ -1106,11 +1110,13 @@ async function onVideoError() {
     const d = P.srcs.find(x => x.kind === 'direct');
     if (d) { P.srcs.push({ label: '原始檔（中轉串流）', url: streamUrl(d.url), kind: 'stream' }); return setSource(P.srcs.length - 1, t); }
   }
-  failMsg(`這個瀏覽器不能播放 ${extOf(P.c.f.name).toUpperCase()} 格式`);
+  failMsg(`網頁無法播放 ${extOf(P.c.f.name).toUpperCase()} 格式`);
 }
 function failMsg(why) {
+  $('#bigplay').hidden = true;
+  const real = /\.(rmvb|rm)$/i.test(P.c.f.name);
   setMsg(`<i class="ti ti-alert-triangle" style="color:var(--danger)"></i><p>${esc(why)}</p>
-    <small>${CONFIG.videoProxy ? '轉碼也失敗了，可以下載後用 VLC 播放' : '設定轉碼中轉站後，avi、wmv、flv 等格式也能播；現在可以先下載用 VLC 播放'}</small>
+    <small>${real ? 'RMVB 是 RealMedia 舊格式，瀏覽器和 pCloud 都不支援轉碼。請下載後用 VLC 播放，或先用 HandBrake 轉成 MP4 再上傳' : CONFIG.videoProxy ? '轉碼也失敗了，可以下載後用 VLC 播放' : '設定轉碼中轉站後，avi、wmv、flv 等格式也能播；現在可以先下載用 VLC 播放'}</small>
     <div class="hrow"><button class="btn primary" id="msgDl"><i class="ti ti-download"></i>下載影片</button>
     <button class="btn" id="msgNext"><i class="ti ti-player-skip-forward"></i>下一支</button></div>`);
   $('#msgDl').onclick = () => download(P.c);
