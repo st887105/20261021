@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d11">
+<meta name="referrer" content="no-referrer">
+<title>我的影視空間</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0b0d11;--panel:#14171e;--card:#1b1f28;--card2:#242a35;--line:#2a303c;
+  --text:#eceef3;--muted:#9aa3b4;--faint:#6b7385;
+  --accent:#5ec8ff;--accent-ink:#04212f;--danger:#ff6b6b;--ok:#4cd39b;
+  --radius:14px;--shadow:0 12px 40px rgba(0,0,0,.55);--top:60px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,select{font:inherit;color:inherit}
+.icon-btn{width:40px;height:40px;border-radius:10px;display:inline-grid;place-items:center;font-size:22px;flex:none;position:relative}
+.icon-btn:hover,.icon-btn.on{background:var(--card2)}
+.icon-btn.on{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:10px;background:var(--card2);border:1px solid var(--line);font-size:14px;text-decoration:none;color:var(--text)}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn .ti{font-size:18px}
+
+/* ===== Tooltip ===== */
+[data-tip]::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translate(-50%,4px);background:#f2f3f6;color:#15171c;font-size:12px;line-height:1.3;padding:5px 9px;border-radius:7px;white-space:nowrap;pointer-events:none;opacity:0;transition:.15s;z-index:5;font-weight:500}
+@media(hover:hover){[data-tip]:hover::after{opacity:1;transform:translate(-50%,0)}}
+.tip-down[data-tip]::after{bottom:auto;top:calc(100% + 8px)}
+.tip-left[data-tip]::after{left:auto;right:0;transform:translateY(4px)}
+@media(hover:hover){.tip-left[data-tip]:hover::after{transform:none}}
+
+/* ===== 頂部列 ===== */
+.topbar{position:sticky;top:0;z-index:30;height:var(--top);display:flex;align-items:center;gap:10px;padding:0 16px;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));background:rgba(11,13,17,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:20px;flex:none}
+.brand b{display:block;font-size:16px;white-space:nowrap}
+.brand small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.search{flex:1;max-width:440px;margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 10px;height:40px}
+.search .ti{color:var(--faint);font-size:18px}
+.search input{flex:1;min-width:0;background:none;border:0;outline:0;font-size:15px}
+.search input::-webkit-search-cancel-button{display:none}
+#btnSearch,#btnSearchClose{display:none}
+
+/* ===== 地區標籤 ===== */
+.chips{position:sticky;top:var(--top);z-index:20;display:flex;gap:8px;overflow-x:auto;padding:10px 20px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;white-space:nowrap}
+.chip small{color:var(--faint);font-size:11px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.chip.on small{color:var(--accent-ink)}
+.chip.warn{border-color:#a8742b}
+
+main{max-width:1500px;margin:0 auto;padding:14px 20px 40px}
+.toolbar{display:flex;align-items:center;gap:10px;margin:2px 0 12px;min-height:36px}
+.back{display:inline-flex;align-items:center;gap:2px;padding:7px 10px 7px 6px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:13px;flex:none}
+.back .ti{font-size:18px}
+.stats{flex:1;min-width:0;color:var(--muted);font-size:13px}
+.stats b{color:var(--text);font-weight:600}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;flex:none}
+.seg button{flex:1;padding:7px 10px;border-radius:7px;font-size:13px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+.seg button .ti{font-size:17px}
+.seg button.on{background:var(--card2);color:var(--text)}
+
+/* ===== 地區區塊 + Carousel 橫列 ===== */
+.region{margin:6px 0 26px}
+.region>h2{display:flex;align-items:center;gap:8px;font-size:19px;margin:0 0 10px}
+.region>h2 small{font-size:13px;color:var(--faint);font-weight:400}
+.row{margin-bottom:18px;position:relative}
+.row-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.row-h .tt{min-width:0;flex:1;display:flex;align-items:baseline;gap:8px}
+.row-h b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-h small{color:var(--faint);font-size:12px;white-space:nowrap}
+.flag{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(94,200,255,.13);color:var(--accent);white-space:nowrap;flex:none}
+.more{display:inline-flex;align-items:center;gap:2px;font-size:13px;color:var(--muted);padding:6px 8px;border-radius:8px;flex:none}
+.more:hover{background:var(--card);color:var(--text)}
+.track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;padding:2px 0 4px}
+.track::-webkit-scrollbar{display:none}
+.track>.card{flex:0 0 clamp(200px,22vw,280px);scroll-snap-align:start}
+.arrow{position:absolute;top:calc(50% + 14px);transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(20,23,30,.92);border:1px solid var(--line);display:grid;place-items:center;font-size:22px;z-index:3;opacity:0;transition:opacity .2s}
+.row:hover .arrow{opacity:1}
+.arrow.l{left:-12px}.arrow.r{right:-12px}
+@media(hover:none){.arrow{display:none}}
+
+/* ===== 影片卡 ===== */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;outline:0;transition:transform .15s,border-color .15s}
+@media(hover:hover){.card:hover{transform:translateY(-2px);border-color:var(--faint)}.card:hover .play-ov{opacity:1}}
+.card:focus-visible{border-color:var(--accent)}
+.cover{position:relative;aspect-ratio:16/9;background:#07080b;display:grid;place-items:center;overflow:hidden}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .ph{font-size:40px;color:var(--faint)}
+.play-ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.28);opacity:0;transition:.2s;font-size:44px;color:#fff}
+.dur{position:absolute;right:6px;bottom:8px;font-size:11px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.75);color:#fff;font-variant-numeric:tabular-nums}
+.fmt{position:absolute;left:6px;top:6px;font-size:10px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.7);color:#ffcf9e;text-transform:uppercase}
+.wbar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.18)}
+.wbar i{display:block;height:100%;background:var(--accent)}
+.cmeta{padding:9px 40px 11px 11px}
+.ctitle{font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.csub{font-size:11px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kebab{position:absolute;right:3px;bottom:6px;width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:20px;color:var(--muted)}
+.kebab:hover{background:var(--card2);color:var(--text)}
+
+/* ===== Skeleton ===== */
+.sk{display:block;border-radius:8px;background:linear-gradient(90deg,#191c24 25%,#262b36 37%,#191c24 63%);background-size:400% 100%;animation:sh 1.3s ease infinite}
+@keyframes sh{0%{background-position:100% 0}100%{background-position:0 0}}
+.sk-line{height:12px;margin:9px 10px 0;width:80%}
+.sk-line.short{width:45%;margin-bottom:12px}
+.sk-card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;flex:0 0 clamp(200px,22vw,280px)}
+.sk-cover{aspect-ratio:16/9;border-radius:0}
+.sk-chip{width:76px;height:32px;border-radius:999px;flex:none}
+.sk-h{width:180px;height:18px;margin:4px 0 12px}
+
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .ti{font-size:52px;color:var(--faint)}
+.empty p{font-size:16px;color:var(--text)}
+.empty .btn{margin-top:14px}
+footer{text-align:center;color:var(--faint);font-size:12px;padding:0 16px 30px;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+
+/* ===== Hamburger 抽屜 ===== */
+.drawer-ov{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s}
+.drawer-ov.open{opacity:1;pointer-events:auto}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(350px,88vw);background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .28s ease;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.drawer-ov.open .drawer{transform:none}
+.dr-head{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 12px 18px;border-bottom:1px solid var(--line)}
+.dr-head b{font-size:16px}
+.dr-body{flex:1;overflow:auto}
+.dr-sec{padding:14px 18px;border-bottom:1px solid var(--line)}
+.dr-sec h4{margin:0 0 10px;font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.04em}
+.dr-sec p{margin:8px 0 0;font-size:12px;color:var(--faint);line-height:1.6}
+.dr-sec .seg{width:100%}
+.hrow{display:flex;gap:8px}
+.hrow .btn{flex:1}
+.txt-in{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;outline:0;margin-bottom:8px}
+.txt-in:focus{border-color:var(--accent)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:14px;cursor:pointer}
+.sw input{width:40px;height:22px;accent-color:var(--accent)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12px;color:var(--muted)}
+.keys kbd{font:inherit;font-size:11px;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;white-space:nowrap}
+
+/* ===== Modal：播放器 ===== */
+.modal{position:fixed;inset:0;z-index:50;background:#000;display:none}
+.modal.open{display:flex;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.pwrap{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;height:100dvh}
+.mtop{display:flex;align-items:center;gap:4px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));background:linear-gradient(#000c,#0000);position:absolute;left:0;right:0;top:0;z-index:4;transition:opacity .25s}
+.mtitle{flex:1;min-width:0;padding-left:6px}
+.mtitle b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtitle small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vstage{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#000}
+.vstage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:0 0;background:#000}
+.vstage.grab{cursor:grab}.vstage.grabbing{cursor:grabbing}
+.vmsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px;color:var(--muted);z-index:2;pointer-events:none}
+.vmsg .btn,.vmsg a{pointer-events:auto}
+.vmsg .ti{font-size:46px}
+.vmsg p{margin:0;color:var(--text)}
+.spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ripple{position:absolute;top:50%;transform:translateY(-50%);width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:15px;font-weight:600;color:#fff;pointer-events:none;animation:rip .55s ease forwards;z-index:3}
+.ripple.l{left:12%}.ripple.r{right:12%}
+@keyframes rip{from{opacity:1}to{opacity:0}}
+.speedtag,.ztag{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:13px;padding:6px 12px;border-radius:999px;z-index:3;pointer-events:none}
+.bigplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:76px;height:76px;border-radius:50%;background:rgba(0,0,0,.55);display:grid;place-items:center;font-size:40px;z-index:3;transition:opacity .2s}
+.ctrl{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:24px 12px 10px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:linear-gradient(#0000,#000d);transition:opacity .25s}
+.hide-ui .mtop,.hide-ui .ctrl,.hide-ui .bigplay{opacity:0;pointer-events:none}
+.hide-ui .vstage{cursor:none}
+.prog{position:relative;height:22px;display:flex;align-items:center;margin:0 4px}
+.prog input{width:100%;margin:0;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p,0%),rgba(255,255,255,.45) var(--p,0%),rgba(255,255,255,.45) var(--b,0%),rgba(255,255,255,.18) var(--b,0%));outline:0;cursor:pointer}
+.prog:hover input{height:6px}
+.prog input::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);border:0}
+.prog input::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);border:0}
+.ptip{position:absolute;bottom:22px;transform:translateX(-50%);background:#f2f3f6;color:#15171c;font-size:12px;padding:3px 7px;border-radius:6px;pointer-events:none;font-variant-numeric:tabular-nums}
+.cbar{display:flex;align-items:center;gap:2px}
+.cbar .icon-btn{width:40px;height:40px;font-size:22px}
+.tm{font-size:13px;color:#dfe3ea;font-variant-numeric:tabular-nums;white-space:nowrap;padding:0 8px}
+.vol{width:80px;accent-color:var(--accent)}
+.sp{flex:1}
+.pill{font-size:13px;font-weight:600;min-width:44px;height:32px;border-radius:8px;padding:0 8px;display:inline-grid;place-items:center;position:relative;font-variant-numeric:tabular-nums}
+.pill:hover{background:var(--card2)}
+.popup{position:absolute;bottom:58px;right:12px;background:var(--card2);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:160px;z-index:6}
+.popup h5{margin:4px 8px 6px;font-size:12px;color:var(--muted);font-weight:500}
+.popup button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;text-align:left}
+.popup button:hover{background:rgba(255,255,255,.06)}
+.popup button.on{color:var(--accent)}
+.popup button.on::after{content:"✓"}
+.plside{width:320px;flex:none;overflow:auto;background:var(--panel);border-left:1px solid var(--line);padding:10px 8px;margin:0;list-style:none}
+.plside h4{margin:4px 8px 10px;font-size:13px;color:var(--muted);font-weight:500}
+.pl-item{width:100%;display:flex;align-items:center;gap:10px;padding:7px;border-radius:10px;text-align:left}
+.pl-item:hover{background:var(--card)}
+.pl-item.on{background:var(--card2);outline:1px solid var(--accent)}
+.pl-item .th{width:96px;aspect-ratio:16/9;border-radius:6px;object-fit:cover;background:#000;flex:none;position:relative;overflow:hidden;display:grid;place-items:center;color:var(--faint)}
+.pl-item .th img{width:100%;height:100%;object-fit:cover}
+.pl-item .th .wbar{height:2px}
+.pl-item span{flex:1;min-width:0;font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pl-item small{color:var(--faint);font-size:11px;flex:none}
+
+/* ===== Bottom Sheet ===== */
+.sheet-ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+.sheet-ov.open{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;max-width:640px;max-height:86dvh;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:20px 20px 0 0;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s ease;padding-bottom:env(safe-area-inset-bottom)}
+.sheet.dragging{transition:none}
+.sheet-ov.open .sheet{transform:none}
+.handle{padding:12px 0 8px;display:grid;place-items:center;cursor:grab;touch-action:none}
+.handle::before{content:"";width:42px;height:5px;border-radius:3px;background:var(--faint)}
+.sheet-body{overflow:auto;padding:2px 18px 20px;overscroll-behavior:contain}
+.sh-title{margin:2px 0 12px;font-size:17px;line-height:1.4}
+.sh-sub{margin:16px 0 8px;font-size:13px;color:var(--muted);font-weight:500}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;word-break:break-word}
+.flist{list-style:none;margin:0;padding:0}
+.flist>li>button:not(.pl-item){width:100%;display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:10px;text-align:left;font-size:15px}
+.flist>li>button:not(.pl-item):hover{background:var(--card)}
+.flist>li>button .ti{font-size:20px;color:var(--muted)}
+.flist span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.flist small{color:var(--faint)}
+.sh-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.sh-actions .btn{flex:1;min-width:110px}
+.optgrid{display:flex;flex-wrap:wrap;gap:6px}
+.optgrid .chip{cursor:pointer}
+
+/* ===== 上傳 ===== */
+.drop{border:2px dashed var(--line);border-radius:14px;padding:26px 16px;text-align:center;color:var(--muted);cursor:pointer;transition:.2s}
+.drop.over,.drop:hover{border-color:var(--accent);color:var(--text);background:rgba(94,200,255,.06)}
+.drop .ti{font-size:40px;color:var(--accent)}
+.drop p{margin:6px 0 2px;color:var(--text)}
+.ulist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.ulist li{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px}
+.ulist .un{display:flex;gap:8px;align-items:center}
+.ulist .un span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ulist .un small{color:var(--faint);flex:none}
+.ubar{height:4px;border-radius:2px;background:var(--line);margin-top:7px;overflow:hidden}
+.ubar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.ulist li.ok .ubar i{background:var(--ok)}
+.ulist li.err .ubar i{background:var(--danger)}
+.ulist li.err small{color:var(--danger)}
+.note{font-size:12px;color:var(--faint);line-height:1.6;margin:10px 0 0}
+
+/* ===== Kebab（桌機浮動） ===== */
+.kmenu{position:fixed;z-index:90;min-width:200px;background:var(--card2);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:none}
+.kmenu.open{display:block;animation:fade .12s ease}
+.kitem{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;text-align:left}
+.kitem:hover{background:rgba(255,255,255,.06)}
+.kitem .ti{font-size:18px;color:var(--muted)}
+
+/* ===== Toast ===== */
+.toasts{position:fixed;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom) + 12px));transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:92vw}
+.toast{display:flex;align-items:center;gap:8px;background:#f2f3f6;color:#15171c;padding:10px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);animation:tin .25s ease}
+.toast .ti{font-size:18px}
+.toast.ok .ti{color:#14945f}.toast.err .ti{color:#d63c3c}
+.toast.out{opacity:0;transform:translateY(8px);transition:.3s}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ===== 響應式 ===== */
+@media(max-width:1100px){.plside{width:270px}}
+@media(max-width:899px){
+  .plside{display:none}
+  .vol{display:none}
+}
+@media(min-width:900px){#btnPl{display:none}}
+@media(max-width:640px){
+  :root{--top:56px}
+  .topbar{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));gap:4px}
+  .brand small{display:none}.brand b{font-size:15px}
+  .brand .logo{width:30px;height:30px;font-size:18px}
+  .search{display:none}
+  #btnSearch{display:inline-grid;margin-left:auto}
+  .topbar.searching .brand,.topbar.searching #btnSearch,.topbar.searching #btnMenu,.topbar.searching #btnUpload{display:none}
+  .topbar.searching .search{display:flex;max-width:none;margin-left:0}
+  .topbar.searching #btnSearchClose{display:inline-grid}
+  .chips{padding:8px 12px}
+  main{padding:10px 12px 28px}
+  .track{gap:10px}
+  .track>.card,.sk-card{flex-basis:68vw}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .cmeta{padding:8px 36px 9px 9px}
+  .seg button span{display:none}
+  .region>h2{font-size:17px}
+  .cbar .icon-btn{width:36px;height:36px;font-size:20px}
+  .tm{font-size:12px;padding:0 4px}
+  .hide-sm{display:none!important}
+  .sheet{border-radius:18px 18px 0 0}
+}
+@media(min-width:641px) and (max-width:899px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <div class="logo"><i class="ti ti-movie"></i></div>
+    <div style="min-width:0"><b id="siteTitle">我的影視空間</b><small id="folderName">讀取雲端資料夾中…</small></div>
+  </div>
+  <label class="search"><i class="ti ti-search"></i><input id="q" type="search" placeholder="搜尋國家、系列或片名" autocomplete="off" enterkeyhint="search"></label>
+  <button class="icon-btn" id="btnSearchClose" aria-label="關閉搜尋"><i class="ti ti-x"></i></button>
+  <button class="icon-btn" id="btnSearch" aria-label="搜尋"><i class="ti ti-search"></i></button>
+  <button class="icon-btn tip-down" id="btnUpload" aria-label="上傳影片" data-tip="上傳影片"><i class="ti ti-cloud-upload"></i></button>
+  <button class="icon-btn tip-down tip-left" id="btnMenu" aria-label="開啟選單" data-tip="選單"><i class="ti ti-menu-2"></i></button>
+</header>
+
+<nav class="chips" id="chips" aria-label="地區"></nav>
+
+<main>
+  <div class="toolbar">
+    <button class="back" id="btnBack" hidden><i class="ti ti-chevron-left"></i>返回</button>
+    <div class="stats" id="stats"></div>
+    <div class="seg" id="viewSeg">
+      <button data-view="rows" title="依國家、系列分列"><i class="ti ti-layout-rows"></i><span>分類</span></button>
+      <button data-view="grid" title="全部影片"><i class="ti ti-layout-grid"></i><span>全部</span></button>
+    </div>
+  </div>
+  <div id="list"></div>
+</main>
+<footer id="footer"></footer>
+
+<!-- Hamburger 抽屜選單 -->
+<div class="drawer-ov" id="drawerOv">
+  <aside class="drawer" role="dialog" aria-label="選單">
+    <div class="dr-head"><b>選單</b><button class="icon-btn" id="btnCloseDrawer" aria-label="關閉"><i class="ti ti-x"></i></button></div>
+    <div class="dr-body">
+      <div class="dr-sec">
+        <button class="btn primary" id="btnUpload2" style="width:100%"><i class="ti ti-cloud-upload"></i>上傳影片</button>
+        <p>上傳的影片會先放在「待整理」，每月 1 號自動歸到對應的國家。</p>
+      </div>
+      <div class="dr-sec">
+        <h4>排序方式</h4>
+        <div class="seg" id="sortSeg">
+          <button data-sort="name">名稱</button>
+          <button data-sort="recent">最新</button>
+          <button data-sort="long">最長</button>
+        </div>
+      </div>
+      <div class="dr-sec">
+        <h4>播放設定</h4>
+        <label class="sw">自動播放下一支<input type="checkbox" id="optAuto"></label>
+        <label class="sw">記住播放位置<input type="checkbox" id="optResume"></label>
+        <div class="hrow" style="margin-top:8px"><button class="btn" id="btnClearHist"><i class="ti ti-history-off"></i>清除觀看紀錄</button></div>
+      </div>
+      <div class="dr-sec">
+        <h4>分類對照</h4>
+        <div class="hrow">
+          <button class="btn" id="btnExportCat"><i class="ti ti-copy"></i>匯出對照</button>
+          <button class="btn" id="btnClearCat"><i class="ti ti-eraser"></i>全部還原</button>
+        </div>
+        <p id="catHint"></p>
+      </div>
+      <div class="dr-sec">
+        <h4>快捷鍵</h4>
+        <div class="keys">
+          <kbd>空白 / K</kbd><span>播放／暫停</span>
+          <kbd>← →</kbd><span>倒退／快轉 10 秒</span>
+          <kbd>Shift + ← →</kbd><span>倒退／快轉 60 秒</span>
+          <kbd>↑ ↓ / M</kbd><span>音量／靜音</span>
+          <kbd>&lt; &gt;</kbd><span>減速／加速</span>
+          <kbd>+ − / Z</kbd><span>放大／縮小／還原</span>
+          <kbd>A</kbd><span>切換畫面比例</span>
+          <kbd>F / I</kbd><span>全螢幕／子母畫面</span>
+          <kbd>N / B</kbd><span>下一支／上一支</span>
+          <kbd>1–9</kbd><span>跳到 10%–90%</span>
+        </div>
+        <p>手機：左右兩側點兩下快轉、雙指縮放、長按 2 倍速。</p>
+      </div>
+      <div class="dr-sec" style="border-bottom:0">
+        <h4>pCloud 公開連結</h4>
+        <input class="txt-in" id="linkIn" type="url" placeholder="https://e.pcloud.link/publink/show?code=…">
+        <button class="btn primary" id="btnReload" style="width:100%"><i class="ti ti-refresh"></i>重新載入</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Modal：播放器 -->
+<div class="modal" id="player" role="dialog" aria-label="影片播放">
+  <div class="pwrap" id="pwrap">
+    <div class="vstage" id="vstage">
+      <video id="vid" playsinline preload="metadata" referrerpolicy="no-referrer"></video>
+      <div class="vmsg" id="vmsg" hidden></div>
+      <button class="bigplay" id="bigplay" aria-label="播放" hidden><i class="ti ti-player-play"></i></button>
+      <div class="speedtag" id="speedtag" hidden></div>
+      <div class="mtop" id="mtop">
+        <button class="icon-btn tip-down" id="btnPClose" aria-label="關閉" data-tip="關閉 (Esc)" style="margin-right:2px"><i class="ti ti-arrow-left"></i></button>
+        <div class="mtitle"><b id="pTitle"></b><small id="pSub"></small></div>
+        <button class="icon-btn tip-down" id="btnPl" aria-label="播放清單" data-tip="播放清單"><i class="ti ti-playlist"></i></button>
+        <button class="icon-btn tip-down tip-left" id="btnPInfo" aria-label="影片資訊" data-tip="影片資訊"><i class="ti ti-info-circle"></i></button>
+      </div>
+      <div class="ctrl" id="ctrl">
+        <div class="prog" id="prog"><input type="range" id="seek" min="0" max="1000" value="0" step="1" aria-label="播放進度"><span class="ptip" id="ptip" hidden></span></div>
+        <div class="cbar">
+          <button class="icon-btn hide-sm" id="btnPrev" aria-label="上一支" data-tip="上一支 (B)"><i class="ti ti-player-skip-back"></i></button>
+          <button class="icon-btn" id="btnBack10" aria-label="倒退 10 秒" data-tip="倒退 10 秒 (←)"><i class="ti ti-rewind-backward-10"></i></button>
+          <button class="icon-btn" id="btnPlay" aria-label="播放" data-tip="播放 (空白)"><i class="ti ti-player-play"></i></button>
+          <button class="icon-btn" id="btnFwd10" aria-label="快轉 10 秒" data-tip="快轉 10 秒 (→)"><i class="ti ti-rewind-forward-10"></i></button>
+          <button class="icon-btn" id="btnNext" aria-label="下一支" data-tip="下一支 (N)"><i class="ti ti-player-skip-forward"></i></button>
+          <button class="icon-btn hide-sm" id="btnMute" aria-label="靜音" data-tip="靜音 (M)"><i class="ti ti-volume"></i></button>
+          <input type="range" class="vol" id="vol" min="0" max="1" step="0.05" value="1" aria-label="音量">
+          <span class="tm" id="tm">0:00 / 0:00</span>
+          <span class="sp"></span>
+          <button class="pill" id="btnSpeed" aria-label="播放速度" data-tip="播放速度 (&lt; &gt;)">1×</button>
+          <button class="icon-btn hide-sm" id="btnZoomOut" aria-label="縮小" data-tip="縮小 (−)"><i class="ti ti-zoom-out"></i></button>
+          <button class="pill hide-sm" id="btnZoomReset" aria-label="還原大小" data-tip="還原大小 (Z)">100%</button>
+          <button class="icon-btn hide-sm" id="btnZoomIn" aria-label="放大" data-tip="放大 (+)"><i class="ti ti-zoom-in"></i></button>
+          <button class="icon-btn" id="btnMore" aria-label="更多設定" data-tip="畫質、比例、循環"><i class="ti ti-adjustments-horizontal"></i></button>
+          <button class="icon-btn hide-sm" id="btnPip" aria-label="子母畫面" data-tip="子母畫面 (I)"><i class="ti ti-picture-in-picture"></i></button>
+          <button class="icon-btn tip-left" id="btnFull" aria-label="全螢幕" data-tip="全螢幕 (F)"><i class="ti ti-maximize"></i></button>
+        </div>
+        <div class="popup" id="popup" hidden></div>
+      </div>
+    </div>
+  </div>
+  <ol class="plside" id="plSide"></ol>
+</div>
+
+<!-- Bottom Sheet -->
+<div class="sheet-ov" id="sheetOv">
+  <div class="sheet" id="sheet" role="dialog">
+    <div class="handle" id="sheetHandle" aria-label="拖曳關閉"></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<div class="kmenu" id="kmenu" role="menu"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<input type="file" id="fileIn" multiple accept="video/*,.mkv,.avi,.wmv,.flv,.ts,.m2ts,.mts,.mpg,.mpeg,.3gp,.rmvb,.rm,.vob" hidden>
+
+<script>
+/* ===================== 設定區 ===================== */
+const CONFIG = {
+  shareLink: 'https://e.pcloud.link/publink/show?code=kZG5LX7ZMaSO447pppXkjBia0mquSQvOoIpV',
+  siteTitle: '我的影視空間',
+  // 上傳用代碼：留空就用上面公開連結的 code（這個資料夾連結已開放上傳）
+  // 如果上傳失敗，到 pCloud 建立「上傳連結」，把它的 code 貼在這裡
+  uploadCode: '',
+  // 影片轉碼中轉站（Cloudflare Worker 網址）。填了之後 avi、wmv、flv 等瀏覽器不支援的格式也能播
+  videoProxy: 'https://pcloud-video.sunny-f0b.workers.dev',
+  // 不顯示的檔案與資料夾
+  exclude: /\.(txt|nfo|url|db|ini|ds_store|rar|zip|7z|torrent|srt|ass|ssa|jpg|jpeg|png|gif|webp|bmp)$/i,
+  hide: /性愛|自拍|破解|流出|外流|偷拍|偷窺|私密影|^待你處理$|^重複備份$/i,
+  // 國家 → 地區（依資料夾名稱自動判斷，可自行增加）
+  countries: [
+    ['中港台', '華語', /中港台|港台|華語|华语/],
+    ['台灣', '華語', /台灣|臺灣|台湾/],
+    ['香港', '華語', /香港/],
+    ['中國', '華語', /中國|中国|大陸|大陆|內地/],
+    ['日本', '日韓', /日本|japan/i],
+    ['韓國', '日韓', /韓國|韩国|korea/i],
+    ['泰國', '東南亞', /泰國|泰国|thai/i],
+    ['越南', '東南亞', /越南/],
+    ['菲律賓', '東南亞', /菲律賓/],
+    ['印度', '南亞', /印度|india/i],
+    ['烏克蘭', '歐洲', /烏克蘭|乌克兰|ukrain/i],
+    ['俄羅斯', '歐洲', /俄羅斯|俄罗斯|russia/i],
+    ['西班牙', '歐洲', /西班牙|spain|spanish/i],
+    ['法國', '歐洲', /法國|法国|france|french/i],
+    ['義大利', '歐洲', /義大利|意大利|italy|italian/i],
+    ['德國', '歐洲', /德國|德国|german/i],
+    ['英國', '歐洲', /英國|英国|british|\buk\b/i],
+    ['波蘭', '歐洲', /波蘭|波兰|poland/i],
+    ['北歐', '歐洲', /瑞典|丹麥|挪威|芬蘭|北歐|sweden|denmark|norway/i],
+    ['美國', '美洲', /美國|美国|好萊塢|好莱坞|hollywood|\busa?\b/i],
+    ['加拿大', '美洲', /加拿大|canada/i],
+    ['拉丁美洲', '美洲', /巴西|墨西哥|阿根廷|拉丁|brazil|mexico/i],
+    ['澳洲', '大洋洲', /澳洲|澳大利亞|australia/i],
+    ['歐洲綜合', '歐洲', /歐洲|欧洲|europe/i],
+    ['全球精選', '全球合輯', /全球|世界|國際|国际|global|world/i]
+  ],
+  regionOrder: ['華語', '日韓', '東南亞', '南亞', '歐洲', '美洲', '大洋洲', '全球合輯', '未分類', '待整理'],
+  // 固定的分類對照：'資料夾名稱': '地區/國家'。網頁上改過後可用選單「匯出對照」貼到這裡
+  catOverrides: {},
+  inbox: /^待整理/,
+  version: 'v1.0.1',
+  updated: '2026-10-21'
+};
+
+/* ===================== 工具 ===================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const coll = new Intl.Collator('zh-Hant-TW', { numeric: true, sensitivity: 'base' });
+const RX_VID = /\.(mp4|m4v|mov|webm|mkv|avi|wmv|flv|f4v|ts|m2ts|mts|3gp|mpe?g|vob|rmvb|rm|ogv)$/i;
+// 瀏覽器通常能直接播的格式；其他格式先走轉碼
+const RX_NATIVE = /\.(mp4|m4v|webm|mov|mkv|ogv)$/i;
+const mqMobile = matchMedia('(max-width:640px)');
+const S = { code: '', api: '', link: '', series: [], clips: [], byId: new Map(), sort: 'name', view: 'rows', region: '', open: '', q: '', loaded: false, linkCache: new Map() };
+
+function store(k, v) {
+  try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; }
+}
+function jget(k, d) { try { return JSON.parse(store(k) || '') ?? d; } catch (e) { return d; } }
+function jset(k, o) { store(k, o && Object.keys(o).length ? JSON.stringify(o) : null); }
+function fmtSize(b) {
+  if (!b) return '—';
+  const u = ['B','KB','MB','GB','TB']; let i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return (i ? b.toFixed(b < 10 ? 1 : 0) : b) + ' ' + u[i];
+}
+function fmtTime(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  s = Math.floor(s);
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}`;
+}
+function fmtDate(t) {
+  if (!t) return '—';
+  const d = new Date(t);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+function syncLock() {
+  document.body.classList.toggle('lock', !!document.querySelector('.modal.open,.drawer-ov.open,.sheet-ov.open'));
+}
+const extOf = n => (n.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
+
+/* ===================== Toast ===================== */
+function toast(msg, type = '') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  const ic = type === 'err' ? 'ti-alert-circle' : type === 'ok' ? 'ti-circle-check' : 'ti-info-circle';
+  t.innerHTML = `<i class="ti ${ic}"></i><span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, type === 'err' ? 4500 : 2600);
+}
+
+/* ===================== pCloud API ===================== */
+function parseLink(link) {
+  const u = new URL(link.trim());
+  const code = u.searchParams.get('code');
+  if (!code) throw new Error('連結裡找不到 code 參數');
+  const eu = /^e\./i.test(u.hostname) || /eapi/i.test(u.hostname);
+  return { code, api: eu ? 'https://eapi.pcloud.com' : 'https://api.pcloud.com' };
+}
+async function pc(method, params = {}) {
+  const qs = new URLSearchParams({ code: S.code, ...params });
+  const r = await fetch(`${S.api}/${method}?${qs}`, { referrerPolicy: 'no-referrer' });
+  const j = await r.json();
+  if (j.result !== 0) throw new Error(j.error || `pCloud 錯誤碼 ${j.result}`);
+  return j;
+}
+const thumb = (f, size = '480x270') =>
+  `${S.api}/getpubthumb?${new URLSearchParams({ code: S.code, fileid: f.fileid, size, crop: '1', type: 'jpg' })}`;
+async function fileLink(f, dl = false) {
+  const key = f.fileid + (dl ? 'd' : '');
+  const hit = S.linkCache.get(key);
+  if (hit && Date.now() - hit.t < 50 * 60e3) return hit.url;
+  const j = await pc('getpublinkdownload', dl ? { fileid: f.fileid, forcedownload: 1 } : { fileid: f.fileid });
+  const url = 'https://' + j.hosts[0] + j.path;
+  S.linkCache.set(key, { url, t: Date.now() });
+  return url;
+}
+const zipUrl = s =>
+  `${S.api}/getpubzip?${new URLSearchParams({ code: S.code, folderid: s.folderid, filename: s.title + '.zip', forcedownload: 1 })}`;
+// 轉碼版本（需要 Worker，pCloud 限制只能從它自己的網站要）
+async function videoVariants(f) {
+  if (!CONFIG.videoProxy) return [];
+  const u = `${CONFIG.videoProxy.replace(/\/$/, '')}/video?${new URLSearchParams({ code: S.code, fileid: f.fileid, api: S.api.includes('eapi') ? 'eu' : 'us' })}`;
+  const r = await fetch(u);
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || '轉碼失敗');
+  return j.variants || [];
+}
+const streamUrl = url => `${CONFIG.videoProxy.replace(/\/$/, '')}/stream?u=${encodeURIComponent(url)}`;
+
+/* ===================== 分類 ===================== */
+function localCats() { return jget('catOverrides', {}) || {}; }
+function catFor(key) { return localCats()[key] || CONFIG.catOverrides[key] || ''; }
+function classify(path) {
+  // path：從根目錄到這個系列的資料夾名稱
+  const key = path.join('/');
+  const ov = catFor(key);
+  if (ov) { const [r, c] = ov.split('/'); return { region: r || '未分類', country: c || r || '未分類' }; }
+  if (!path.length || path.some(p => CONFIG.inbox.test(p))) return { region: '待整理', country: '待整理' };
+  // 由內往外找：最靠近影片的資料夾名稱優先
+  for (let i = path.length - 1; i >= 0; i--) {
+    for (const [country, region, rx] of CONFIG.countries) if (rx.test(path[i])) return { region, country };
+    if (CONFIG.regionOrder.includes(path[i])) return { region: path[i], country: path[i + 1] && i + 1 < path.length - 1 ? path[i + 1] : path[i] };
+  }
+  return { region: '未分類', country: '未分類' };
+}
+function seriesTitle(name, country) {
+  let t = name.replace(/^[\w.-]*@[\w.-]+?\./, '').replace(/^[\w-]+@\S+\s*/, '').trim();
+  const stripped = t.replace(new RegExp(country, 'g'), '').replace(/^[\s\-–—·・_]+|[\s\-–—·・_]+$/g, '').trim();
+  return stripped || (t === country ? country + '精選' : t) || name;
+}
+function clipLabel(f, i) {
+  let n = f.name.replace(/\.[^.]+$/, '').replace(/[-_.](hd|hi|sd|lo|720p|1080p|480p)$/i, '');
+  const looksLikeCode = /^[0-9a-f]{16,}$/i.test(n) || (/^[a-z0-9]{8,20}$/i.test(n) && !/[aeiou]{1}[a-z]*\d|\d{1,2}x\d{1,2}/i.test(n) && !/\s/.test(n));
+  if (looksLikeCode) return '片段 ' + String(i + 1).padStart(2, '0');
+  return n.replace(/[_]+/g, ' ').replace(/(?<=\S)-(?=\S)/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function buildLibrary(meta) {
+  const series = [], clips = [];
+  const walk = (node, path) => {
+    const vids = [];
+    for (const c of node.contents || []) {
+      if (CONFIG.hide.test(c.name)) continue;
+      if (c.isfolder) walk(c, [...path, c.name.trim()]);
+      else if (!CONFIG.exclude.test(c.name) && (c.category === 2 || RX_VID.test(c.name) || (c.contenttype || '').startsWith('video/'))) vids.push(c);
+    }
+    if (!vids.length) return;
+    vids.sort((a, b) => coll.compare(a.name, b.name));
+    const { region, country } = classify(path);
+    const name = path.length ? path[path.length - 1] : '待整理';
+    const s = {
+      id: 's' + series.length, key: path.join('/') || '(根目錄)', folder: name, path, region, country,
+      title: path.length ? seriesTitle(name, country) : '新上傳（待整理）',
+      folderid: node.folderid, clips: [],
+      modified: Math.max(...vids.map(f => Date.parse(f.modified) || 0))
+    };
+    vids.forEach((f, i) => {
+      const c = {
+        id: 'c' + f.fileid, f, s, idx: i, label: clipLabel(f, i),
+        dur: +f.duration || +(jget('durs', {})[f.fileid] || 0), modified: Date.parse(f.modified) || 0
+      };
+      s.clips.push(c); clips.push(c);
+    });
+    series.push(s);
+  };
+  if (meta.isfolder) walk(meta, []);
+  else walk({ contents: [meta] }, []);
+  return { series, clips };
+}
+function reclassify() {
+  for (const s of S.series) {
+    const r = classify(s.path); s.region = r.region; s.country = r.country;
+    s.title = s.path.length ? seriesTitle(s.folder, s.country) : '新上傳（待整理）';
+  }
+}
+
+/* ===================== 觀看紀錄 ===================== */
+const hist = () => jget('watch', {}) || {};
+function saveProgress(c, t, d) {
+  if (!c || !d || !isFinite(d)) return;
+  const h = hist();
+  if (t < 5 || d - t < 8) delete h[c.f.fileid];
+  else h[c.f.fileid] = { t: Math.floor(t), d: Math.floor(d), at: Date.now() };
+  jset('watch', h);
+  if (!c.dur) { c.dur = d; const ds = jget('durs', {}) || {}; ds[c.f.fileid] = Math.round(d); jset('durs', ds); }
+}
+const watchedPct = c => { const w = hist()[c.f.fileid]; return w ? Math.min(100, w.t / w.d * 100) : 0; };
+
+/* ===================== 畫面 ===================== */
+function regions() {
+  const q = S.q.trim().toLowerCase();
+  const match = c => !q || [c.label, c.f.name, c.s.title, c.s.folder, c.s.country, c.s.region].some(x => x.toLowerCase().includes(q));
+  const m = new Map();
+  for (const s of S.series) {
+    const cs = s.clips.filter(match);
+    if (!cs.length) continue;
+    if (!m.has(s.region)) m.set(s.region, []);
+    m.get(s.region).push({ ...s, shown: cs });
+  }
+  const order = r => { const i = CONFIG.regionOrder.indexOf(r); return i < 0 ? 99 : i; };
+  return [...m].sort((a, b) => order(a[0]) - order(b[0]) || coll.compare(a[0], b[0])).map(([name, ss]) => {
+    if (S.sort === 'recent') ss.sort((a, b) => b.modified - a.modified);
+    else ss.sort((a, b) => coll.compare(a.country, b.country) || coll.compare(a.title, b.title));
+    return { name, series: ss, count: ss.reduce((n, s) => n + s.shown.length, 0) };
+  });
+}
+function sortClips(cs) {
+  cs = cs.slice();
+  if (S.sort === 'recent') cs.sort((a, b) => b.modified - a.modified);
+  else if (S.sort === 'long') cs.sort((a, b) => (b.dur || 0) - (a.dur || 0));
+  return cs;
+}
+function showSkeleton() {
+  $('#stats').innerHTML = '<span class="sk" style="width:160px;height:12px;display:inline-block"></span>';
+  $('#chips').innerHTML = '<span class="sk sk-chip"></span>'.repeat(6);
+  const card = '<div class="sk-card"><div class="sk sk-cover"></div><span class="sk sk-line"></span><span class="sk sk-line short"></span></div>';
+  $('#list').innerHTML = ('<span class="sk sk-h"></span><div class="track" style="overflow:hidden">' + card.repeat(6) + '</div><br>').repeat(2);
+}
+function cardHTML(c, showSeries) {
+  const pct = watchedPct(c), ext = extOf(c.f.name);
+  const cover = c.f.thumb
+    ? `<img loading="lazy" src="${thumb(c.f)}" alt="" onerror="this.outerHTML='<i class=&quot;ti ti-movie ph&quot;></i>'">`
+    : '<i class="ti ti-movie ph"></i>';
+  return `<article class="card" data-id="${c.id}" tabindex="0">
+    <div class="cover">${cover}<div class="play-ov"><i class="ti ti-player-play"></i></div>
+      ${RX_NATIVE.test(c.f.name) && ext !== 'mkv' ? '' : `<span class="fmt">${esc(ext)}</span>`}
+      ${c.dur ? `<span class="dur">${fmtTime(c.dur)}</span>` : ''}
+      ${pct ? `<span class="wbar"><i style="width:${pct}%"></i></span>` : ''}</div>
+    <div class="cmeta"><div class="ctitle" title="${esc(c.f.name)}">${esc(c.label)}</div>
+      <div class="csub">${showSeries ? esc(c.s.country + ' · ' + c.s.title) : fmtSize(c.f.size)}</div></div>
+    <button class="kebab" data-id="${c.id}" aria-label="更多選項"><i class="ti ti-dots-vertical"></i></button>
+  </article>`;
+}
+function rowHTML(title, sub, cards, opts = '') {
+  return `<section class="row" ${opts}>
+    <div class="row-h"><div class="tt"><b>${title}</b><small>${sub}</small></div>${cards.more || ''}</div>
+    <button class="arrow l" data-dir="-1" aria-label="往左"><i class="ti ti-chevron-left"></i></button>
+    <div class="track">${cards.html}</div>
+    <button class="arrow r" data-dir="1" aria-label="往右"><i class="ti ti-chevron-right"></i></button>
+  </section>`;
+}
+function render() {
+  const rs = regions();
+  const total = rs.reduce((n, r) => n + r.count, 0);
+  if (S.region && !rs.some(r => r.name === S.region)) S.region = '';
+  $('#chips').innerHTML = `<button class="chip ${S.region ? '' : 'on'}" data-region="">全部 <small>${total}</small></button>` +
+    rs.map(r => `<button class="chip ${S.region === r.name ? 'on' : ''} ${r.name === '待整理' ? 'warn' : ''}" data-region="${esc(r.name)}">${esc(r.name)} <small>${r.count}</small></button>`).join('');
+  $('#chips .chip.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
+  document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === S.view));
+  document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === S.sort));
+  $('#btnBack').hidden = !S.open;
+  $('#viewSeg').hidden = !!S.open;
+
+  // 單一系列頁
+  if (S.open) {
+    const s = S.series.find(x => x.id === S.open);
+    if (!s) { S.open = ''; return render(); }
+    $('#stats').innerHTML = `<b>${esc(s.title)}</b> · ${esc(s.region)} / ${esc(s.country)} · ${s.clips.length} 支`;
+    $('#list').innerHTML = `<div class="hrow" style="margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn primary" data-act="playall" style="flex:none"><i class="ti ti-player-play"></i>從頭播放</button>
+        <button class="btn" data-act="cat" style="flex:none"><i class="ti ti-map-pin"></i>變更分類</button>
+        <button class="btn" data-act="zip" style="flex:none"><i class="ti ti-download"></i>下載整包</button></div>
+      <div class="grid">${sortClips(s.clips).map(c => cardHTML(c, false)).join('')}</div>`;
+    return;
+  }
+
+  const shown = S.region ? rs.filter(r => r.name === S.region) : rs;
+  const count = shown.reduce((n, r) => n + r.count, 0);
+  $('#stats').innerHTML = (S.q ? `搜尋「${esc(S.q)}」：` : '') +
+    `${S.region ? `<b>${esc(S.region)}</b> · ` : ''}${shown.reduce((n, r) => n + r.series.length, 0)} 個系列 · <b>${count}</b> 支影片`;
+  if (!shown.length) {
+    $('#list').innerHTML = `<div class="empty"><i class="ti ti-movie-off"></i><p>${S.q ? '找不到符合的影片' : '這個資料夾裡還沒有影片'}</p>${S.q ? '' : '<button class="btn primary" data-act="upload"><i class="ti ti-cloud-upload"></i>上傳影片</button>'}</div>`;
+    return;
+  }
+  if (S.view === 'grid') {
+    const cs = sortClips(shown.flatMap(r => r.series.flatMap(s => s.shown)));
+    $('#list').innerHTML = `<div class="grid">${cs.map(c => cardHTML(c, true)).join('')}</div>`;
+    return;
+  }
+  // 分類橫列：繼續觀看 → 各地區 → 各系列
+  let html = '';
+  if (!S.region && !S.q) {
+    const h = hist();
+    const cont = S.clips.filter(c => h[c.f.fileid]).sort((a, b) => h[b.f.fileid].at - h[a.f.fileid].at).slice(0, 20);
+    if (cont.length) html += `<div class="region">${rowHTML('<i class="ti ti-history" style="color:var(--accent)"></i> 繼續觀看', cont.length + ' 支', { html: cont.map(c => cardHTML(c, true)).join('') })}</div>`;
+  }
+  html += shown.map(r => `<div class="region"><h2>${esc(r.name)} <small>${r.series.length} 個系列 · ${r.count} 支</small></h2>` +
+    r.series.map(s => rowHTML(esc(s.title), `${s.shown.length} 支`, {
+      html: sortClips(s.shown).map(c => cardHTML(c, false)).join(''),
+      more: `<span class="flag">${esc(s.country)}</span><button class="more" data-open="${s.id}">全部<i class="ti ti-chevron-right"></i></button>
+             <button class="icon-btn" data-skebab="${s.id}" aria-label="系列選項" style="width:34px;height:34px;font-size:19px;color:var(--muted)"><i class="ti ti-dots-vertical"></i></button>`
+    })).join('') + '</div>').join('');
+  $('#list').innerHTML = html;
+}
+function updateCatHint() {
+  const n = Object.keys(localCats()).length;
+  $('#catHint').textContent = n
+    ? `你在這台裝置改過 ${n} 個系列的分類。按「匯出對照」複製後貼到程式的 CONFIG.catOverrides，其他裝置也會一樣。`
+    : '分類依資料夾名稱裡的國家自動判斷。判斷錯了，在系列的三點選單選「變更分類」。';
+}
+function openSeries(id, fromHistory) {
+  if (!fromHistory) history.pushState({ open: id }, '');
+  S.open = id; render(); scrollTo({ top: 0 });
+}
+function closeSeries() {
+  if (history.state && history.state.open) history.back();
+  else { S.open = ''; render(); }
+}
+addEventListener('popstate', e => {
+  if ($('#player').classList.contains('open')) closePlayer(true);
+  if ($('#sheetOv').classList.contains('open')) closeSheet();
+  S.open = (e.state && e.state.open) || ''; render();
+});
+
+/* ===================== 載入 ===================== */
+async function load() {
+  S.loaded = false;
+  showSkeleton();
+  $('#folderName').textContent = '讀取雲端資料夾中…';
+  try {
+    const p = parseLink(S.link);
+    S.code = p.code; S.api = p.api; S.linkCache.clear();
+    const j = await pc('showpublink');
+    S.canUpload = j.canupload !== false;
+    const lib = buildLibrary(j.metadata);
+    S.series = lib.series; S.clips = lib.clips;
+    S.byId = new Map(S.clips.map(c => [c.id, c]));
+    $('#folderName').textContent = j.metadata.name || 'pCloud 資料夾';
+    S.loaded = true;
+    render(); updateCatHint();
+    toast(`已載入 ${S.series.length} 個系列、${S.clips.length} 支影片`, 'ok');
+  } catch (e) {
+    console.error(e);
+    $('#stats').textContent = ''; $('#chips').innerHTML = '';
+    $('#folderName').textContent = '讀取失敗';
+    $('#list').innerHTML = `<div class="empty"><i class="ti ti-cloud-off"></i><p>讀取雲端資料夾失敗</p><small>${esc(e.message)}</small><br><button class="btn primary" data-act="retry"><i class="ti ti-refresh"></i>重試</button></div>`;
+    toast('讀取失敗：' + e.message, 'err');
+  }
+}
+
+/* ===================== Kebab ===================== */
+function clipItems(c) {
+  return [
+    ['ti-player-play', '播放', () => openPlayer(c.s, c.idx)],
+    ['ti-info-circle', '影片資訊', () => openInfo(c)],
+    ['ti-list-details', `打開系列（${c.s.clips.length} 支）`, () => openSeries(c.s.id)],
+    ['ti-download', '下載影片', () => download(c)],
+    ['ti-external-link', '在 pCloud 開啟', () => window.open(S.link, '_blank', 'noopener')]
+  ];
+}
+function seriesItems(s) {
+  return [
+    ['ti-player-play', '從頭播放', () => openPlayer(s, 0)],
+    ['ti-list-details', '打開系列', () => openSeries(s.id)],
+    ['ti-map-pin', '變更分類', () => openCat(s)],
+    ['ti-download', '下載整包 ZIP', () => downloadZip(s)]
+  ];
+}
+let kOwner = null;
+function closeKebab() { $('#kmenu').classList.remove('open'); kOwner = null; }
+function showMenu(btn, title, items) {
+  if (mqMobile.matches) {
+    closeKebab();
+    openSheet(`<h3 class="sh-title">${esc(title)}</h3><ul class="flist">${items.map((it, i) =>
+      `<li><button data-act="k" data-i="${i}"><i class="ti ${it[0]}"></i><span>${it[1]}</span></button></li>`).join('')}</ul>`,
+      (act, i) => { closeSheet(); items[i][2](); });
+    return;
+  }
+  if (kOwner === btn) return closeKebab();
+  const m = $('#kmenu');
+  m.innerHTML = items.map((it, i) => `<button class="kitem" role="menuitem" data-i="${i}"><i class="ti ${it[0]}"></i>${it[1]}</button>`).join('');
+  m._items = items;
+  m.classList.add('open');
+  const r = btn.getBoundingClientRect();
+  let x = r.right - m.offsetWidth, y = r.bottom + 6;
+  if (x < 8) x = 8;
+  if (y + m.offsetHeight > innerHeight - 8) y = Math.max(8, r.top - m.offsetHeight - 6);
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+  kOwner = btn;
+}
+$('#kmenu').addEventListener('click', e => {
+  const b = e.target.closest('.kitem'); if (!b) return;
+  const fn = $('#kmenu')._items[+b.dataset.i][2];
+  closeKebab(); fn();
+});
+function clickLink(url) {
+  const a = document.createElement('a'); a.href = url; a.rel = 'noreferrer noopener'; a.referrerPolicy = 'no-referrer'; a.target = '_blank';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function download(c) {
+  try { clickLink(await fileLink(c.f, true)); toast('開始下載…'); }
+  catch (e) { toast('下載失敗：' + e.message, 'err'); }
+}
+function downloadZip(s) {
+  if (!s.folderid && s.folderid !== 0) return toast('這個系列不能整包下載', 'err');
+  clickLink(zipUrl(s)); toast('開始下載…');
+}
+function copyText(t, okMsg) {
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast(okMsg, 'ok'), () => toast('無法複製，請手動複製', 'err'));
+  else toast('這個瀏覽器不支援複製', 'err');
+}
+
+/* ===================== 變更分類 ===================== */
+function openCat(s) {
+  const regs = CONFIG.regionOrder.filter(r => r !== '待整理');
+  const countriesOf = r => [...new Set(CONFIG.countries.filter(x => x[1] === r).map(x => x[0]))];
+  let pickR = s.region === '待整理' ? '' : s.region;
+  const draw = () => {
+    openSheet(`<h3 class="sh-title">變更分類：${esc(s.title)}</h3>
+      <dl class="kv"><dt>目前</dt><dd>${esc(s.region)} / ${esc(s.country)}</dd><dt>資料夾</dt><dd>${esc(s.key)}</dd></dl>
+      <h4 class="sh-sub">1. 選地區</h4>
+      <div class="optgrid">${regs.map(r => `<button class="chip ${pickR === r ? 'on' : ''}" data-act="r" data-v="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+      ${pickR ? `<h4 class="sh-sub">2. 選國家</h4>
+      <div class="optgrid">${countriesOf(pickR).map(c => `<button class="chip" data-act="c" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      <div class="hrow" style="margin-top:10px"><input class="txt-in" id="catNew" placeholder="或輸入其他國家名稱" style="margin:0"><button class="btn primary" data-act="cnew" style="flex:none">確定</button></div>` : ''}
+      ${catFor(s.key) ? '<div class="sh-actions"><button class="btn" data-act="reset"><i class="ti ti-arrow-back-up"></i>還原自動判斷</button></div>' : ''}
+      <p class="note">這裡只改網站上的分類。每月整理時，雲端資料夾也會照這個分類搬移。</p>`,
+      (act, i, b) => {
+        if (act === 'r') { pickR = b.dataset.v; draw(); return; }
+        let country = '';
+        if (act === 'c') country = b.dataset.v;
+        else if (act === 'cnew') { country = $('#catNew').value.trim(); if (!country) { toast('請輸入國家名稱', 'err'); return; } }
+        const o = localCats();
+        if (act === 'reset') delete o[s.key];
+        else if (country) o[s.key] = pickR + '/' + country;
+        else return;
+        jset('catOverrides', o); reclassify(); closeSheet(); render(); updateCatHint();
+        toast(act === 'reset' ? '已還原自動判斷' : `已移到 ${pickR} / ${country}`, 'ok');
+      });
+  };
+  draw();
+}
+
+/* ===================== Bottom Sheet ===================== */
+let sheetHandler = null;
+function openSheet(html, handler) {
+  const keepScroll = $('#sheetOv').classList.contains('open') ? $('#sheetBody').scrollTop : 0;
+  $('#sheetBody').innerHTML = html;
+  $('#sheetBody').scrollTop = keepScroll;
+  sheetHandler = handler;
+  $('#sheet').style.transform = '';
+  $('#sheetOv').classList.add('open');
+  syncLock();
+}
+function closeSheet() { $('#sheetOv').classList.remove('open'); sheetHandler = null; syncLock(); }
+$('#sheetOv').addEventListener('click', e => { if (e.target.id === 'sheetOv') closeSheet(); });
+$('#sheetBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (b && sheetHandler) sheetHandler(b.dataset.act, +(b.dataset.i || 0), b);
+});
+(() => {
+  const sh = $('#sheet'), hd = $('#sheetHandle'); let y0 = null, dy = 0;
+  hd.addEventListener('pointerdown', e => { y0 = e.clientY; dy = 0; sh.classList.add('dragging'); hd.setPointerCapture(e.pointerId); });
+  hd.addEventListener('pointermove', e => { if (y0 == null) return; dy = Math.max(0, e.clientY - y0); sh.style.transform = `translateY(${dy}px)`; });
+  const end = () => { if (y0 == null) return; y0 = null; sh.classList.remove('dragging'); sh.style.transform = ''; if (dy > 90) closeSheet(); };
+  hd.addEventListener('pointerup', end); hd.addEventListener('pointercancel', end);
+})();
+
+function openInfo(c) {
+  const f = c.f;
+  const rows = [
+    ['片名', c.label], ['系列', c.s.title], ['分類', c.s.region + ' / ' + c.s.country], ['檔名', f.name],
+    ['格式', extOf(f.name).toUpperCase() + (f.videocodec ? ` · ${f.videocodec}${f.audiocodec ? ' / ' + f.audiocodec : ''}` : '')],
+    f.width && ['解析度', `${f.width} × ${f.height}${f.fps ? ' · ' + f.fps + ' fps' : ''}`],
+    c.dur && ['長度', fmtTime(c.dur)], ['大小', fmtSize(f.size)], ['更新日期', fmtDate(f.modified)]
+  ].filter(Boolean);
+  openSheet(`<h3 class="sh-title">${esc(c.label)}</h3><dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <div class="sh-actions">
+      ${$('#player').classList.contains('open') ? '' : '<button class="btn primary" data-act="play"><i class="ti ti-player-play"></i>播放</button>'}
+      <button class="btn" data-act="cat"><i class="ti ti-map-pin"></i>變更分類</button>
+      <button class="btn" data-act="dl"><i class="ti ti-download"></i>下載</button></div>`,
+    act => {
+      if (act === 'play') { closeSheet(); openPlayer(c.s, c.idx); }
+      else if (act === 'cat') openCat(c.s);
+      else if (act === 'dl') { closeSheet(); download(c); }
+    });
+}
+
+/* ===================== 上傳 ===================== */
+const UP = { queue: [], busy: false, xhr: null, done: 0 };
+function openUpload() {
+  closeDrawer(); closeKebab();
+  const html = () => `<h3 class="sh-title">上傳影片</h3>
+    <div class="drop" id="drop" data-act="pick"><i class="ti ti-cloud-upload"></i><p>點這裡選擇影片，或把檔案拖進來</p>
+      <small>可一次選多個 · mp4、mkv、avi、wmv、mov、flv 都可以</small></div>
+    <ul class="ulist" id="ulist">${UP.queue.map(uItem).join('')}</ul>
+    ${UP.queue.length ? `<div class="sh-actions">${UP.busy ? '<button class="btn" data-act="stop"><i class="ti ti-player-stop"></i>停止</button>' : '<button class="btn" data-act="clear"><i class="ti ti-trash"></i>清空清單</button>'}
+      <button class="btn primary" data-act="reload"><i class="ti ti-refresh"></i>完成並重新整理</button></div>` : ''}
+    <p class="note">影片會上傳到 pCloud 資料夾最上層，網站上顯示在「待整理」。每月 1 號會自動依國家歸類，你也可以先在系列選單「變更分類」。<br>大檔案請用 Wi-Fi，上傳時不要關閉這個頁面。</p>
+    <a class="btn" href="${esc(S.link)}" target="_blank" rel="noopener" style="width:100%;margin-top:10px"><i class="ti ti-cloud"></i>改到 pCloud 網頁上傳</a>`;
+  openSheet(html(), act => {
+    if (act === 'pick') $('#fileIn').click();
+    else if (act === 'stop') { UP.queue.forEach(u => { if (u.st === 'wait') u.st = 'stop'; }); UP.xhr?.abort(); }
+    else if (act === 'clear') { UP.queue = []; openUpload(); }
+    else if (act === 'reload') { closeSheet(); if (UP.done) { UP.done = 0; load(); } }
+  });
+  const d = $('#drop');
+  ['dragenter', 'dragover'].forEach(t => d.addEventListener(t, e => { e.preventDefault(); d.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(t => d.addEventListener(t, e => { e.preventDefault(); d.classList.remove('over'); }));
+  d.addEventListener('drop', e => addUploads(e.dataTransfer.files));
+}
+function uItem(u, i) {
+  const st = { wait: '等待中', up: Math.round(u.p * 100) + '%', ok: '完成', err: u.msg || '失敗', stop: '已停止' }[u.st];
+  return `<li class="${u.st}" data-u="${i}"><div class="un"><i class="ti ${u.st === 'ok' ? 'ti-circle-check' : u.st === 'err' ? 'ti-alert-circle' : 'ti-movie'}"></i><span>${esc(u.file.name)}</span><small>${fmtSize(u.file.size)} · ${esc(st)}</small></div>
+    <div class="ubar"><i style="width:${u.st === 'ok' ? 100 : Math.round(u.p * 100)}%"></i></div></li>`;
+}
+function refreshUItem(i) {
+  const li = document.querySelector(`#ulist [data-u="${i}"]`);
+  if (li) li.outerHTML = uItem(UP.queue[i], i);
+}
+function addUploads(files) {
+  const list = [...files].filter(f => RX_VID.test(f.name) || f.type.startsWith('video/'));
+  if (!list.length) return toast('請選擇影片檔', 'err');
+  if (list.length < files.length) toast(`已略過 ${files.length - list.length} 個非影片檔`);
+  list.forEach(file => UP.queue.push({ file, p: 0, st: 'wait' }));
+  openUpload();
+  runUploads();
+}
+$('#fileIn').addEventListener('change', e => { addUploads(e.target.files); e.target.value = ''; });
+async function runUploads() {
+  if (UP.busy) return;
+  UP.busy = true; openUpload();
+  for (let i = 0; i < UP.queue.length; i++) {
+    const u = UP.queue[i];
+    if (u.st !== 'wait') continue;
+    u.st = 'up'; refreshUItem(i);
+    try { await uploadOne(u, () => refreshUItem(i)); u.st = 'ok'; UP.done++; }
+    catch (e) { u.st = e.name === 'AbortError' ? 'stop' : 'err'; u.msg = e.message; }
+    refreshUItem(i);
+  }
+  UP.busy = false;
+  const ok = UP.queue.filter(u => u.st === 'ok').length, bad = UP.queue.filter(u => u.st === 'err').length;
+  if ($('#sheetOv').classList.contains('open') && $('#drop')) openUpload();
+  if (bad) toast(`${bad} 支上傳失敗，可改到 pCloud 網頁上傳`, 'err');
+  else if (ok) toast(`已上傳 ${ok} 支影片`, 'ok');
+}
+function uploadOne(u, onProg) {
+  return new Promise((res, rej) => {
+    const code = CONFIG.uploadCode || S.code;
+    const qs = new URLSearchParams({ code, names: CONFIG.siteTitle, nopartial: 1 });
+    const fd = new FormData(); fd.append('file', u.file, u.file.name);
+    const x = new XMLHttpRequest(); UP.xhr = x;
+    x.open('POST', `${S.api}/uploadtolink?${qs}`);
+    let last = 0;
+    x.upload.onprogress = e => { if (e.lengthComputable) { u.p = e.loaded / e.total; if (Date.now() - last > 300) { last = Date.now(); onProg(); } } };
+    x.onload = () => {
+      let j = {}; try { j = JSON.parse(x.responseText); } catch (e) {}
+      if (x.status === 200 && j.result === 0) res();
+      else rej(new Error(j.error ? `pCloud：${j.error}` : `HTTP ${x.status}`));
+    };
+    x.onerror = () => rej(new Error('連線中斷'));
+    x.onabort = () => { const e = new Error('已停止'); e.name = 'AbortError'; rej(e); };
+    x.send(fd);
+  });
+}
+addEventListener('beforeunload', e => { if (UP.busy) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ===================== 播放器 ===================== */
+const vid = $('#vid'), stage = $('#vstage');
+const P = { s: null, i: 0, c: null, srcs: [], si: 0, tried: new Set(), zoom: 1, tx: 0, ty: 0, fit: 'contain', loop: false, uiT: 0, saveT: 0 };
+const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3];
+const FITS = { contain: '原比例', cover: '填滿裁切', fill: '拉伸填滿' };
+function openPlayer(s, i = 0) {
+  closeKebab(); closeSheet(); closeDrawer();
+  P.s = s;
+  $('#player').classList.add('open'); syncLock();
+  if (!history.state || !history.state.player) history.pushState({ ...(history.state || {}), player: 1 }, '');
+  vid.volume = +(store('vol') || 1); $('#vol').value = vid.volume;
+  vid.muted = store('muted') === '1';
+  vid.playbackRate = +(store('rate') || 1);
+  P.fit = store('fit') || 'contain'; vid.style.objectFit = P.fit;
+  syncMute(); syncSpeed();
+  playAt(i);
+}
+function closePlayer(fromHistory) {
+  if (!$('#player').classList.contains('open')) return;
+  saveNow();
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {});
+  vid.pause(); vid.removeAttribute('src'); vid.load();
+  $('#player').classList.remove('open'); syncLock();
+  $('#popup').hidden = true;
+  if (!fromHistory && history.state && history.state.player) history.back();
+  if (S.loaded) render();
+}
+function setMsg(html) { const m = $('#vmsg'); m.hidden = !html; m.innerHTML = html || ''; }
+function renderPlaylist() {
+  const h = hist();
+  const items = P.s.clips.map((c, i) => `<li><button class="pl-item ${i === P.i ? 'on' : ''}" data-act="pl" data-i="${i}">
+    <span class="th">${c.f.thumb ? `<img src="${thumb(c.f, '160x92')}" alt="" loading="lazy">` : '<i class="ti ti-movie"></i>'}${h[c.f.fileid] ? `<span class="wbar"><i style="width:${watchedPct(c)}%"></i></span>` : ''}</span>
+    <span>${esc(c.label)}</span><small>${c.dur ? fmtTime(c.dur) : fmtSize(c.f.size)}</small></button></li>`).join('');
+  P.plItems = items;
+  $('#plSide').innerHTML = `<h4>${esc(P.s.title)} · ${P.s.clips.length} 支</h4>` + items;
+  $('#plSide .pl-item.on')?.scrollIntoView({ block: 'nearest' });
+  if ($('#sheetBody .pl-list') && $('#sheetOv').classList.contains('open')) $('#sheetBody .pl-list').innerHTML = items;
+}
+async function playAt(i, keepTime) {
+  saveNow();
+  P.i = (i + P.s.clips.length) % P.s.clips.length;
+  const c = P.c = P.s.clips[P.i];
+  $('#pTitle').textContent = c.label;
+  $('#pSub').textContent = `${P.s.country} · ${P.s.title} · ${P.i + 1} / ${P.s.clips.length}`;
+  renderPlaylist();
+  resetZoom();
+  P.srcs = []; P.si = 0; P.tried = new Set(); P.startAt = keepTime ?? null;
+  setMsg('<div class="spinner"></div><p>載入中…</p>');
+  try {
+    const direct = { label: '原始檔', url: await fileLink(c.f), kind: 'direct' };
+    if (c !== P.c) return;
+    if (RX_NATIVE.test(c.f.name) || !CONFIG.videoProxy) P.srcs.push(direct);
+    if (!RX_NATIVE.test(c.f.name) && CONFIG.videoProxy) { await addVariants(c); if (c !== P.c) return; P.srcs.push(direct); }
+    setSource(0);
+  } catch (e) { if (c === P.c) failMsg('取得影片連結失敗：' + e.message); }
+}
+async function addVariants(c) {
+  if (P.tried.has('tx')) return;
+  P.tried.add('tx');
+  try {
+    const vs = await videoVariants(c.f);
+    vs.sort((a, b) => (b.height || 0) - (a.height || 0));
+    for (const v of vs) P.srcs.push({ label: v.transcoded ? `轉碼 ${v.height || ''}p` : '原始檔（中轉）', url: v.url, kind: 'tx' });
+  } catch (e) { console.warn('轉碼', e); }
+}
+function setSource(k, keepTime) {
+  const s = P.srcs[k]; if (!s) return;
+  P.si = k;
+  const t = keepTime ?? P.startAt;
+  vid.src = s.url;
+  vid.load();
+  if (P.lm) vid.removeEventListener('loadedmetadata', P.lm);
+  vid.addEventListener('loadedmetadata', P.lm = () => {
+    P.lm = null;
+    const w = hist()[P.c.f.fileid];
+    let at = t;
+    if (at == null && store('optResume') !== '0' && w && w.t > 5) at = w.t;
+    if (at) { vid.currentTime = at; if (keepTime == null && t == null) toast(`從 ${fmtTime(at)} 繼續播放`); }
+    vid.playbackRate = +(store('rate') || 1);
+  }, { once: true });
+  vid.play().catch(() => { $('#bigplay').hidden = false; });
+}
+async function onVideoError() {
+  if (!P.c || !vid.getAttribute('src')) return;
+  const t = vid.currentTime || P.startAt;
+  // 換下一個來源：直連 → 轉碼 → Worker 中轉串流
+  if (P.si + 1 < P.srcs.length) return setSource(P.si + 1, t);
+  if (CONFIG.videoProxy && !P.tried.has('tx')) {
+    setMsg('<div class="spinner"></div><p>格式不支援，改用轉碼版本…</p>');
+    const n = P.srcs.length; await addVariants(P.c);
+    if (P.srcs.length > n) return setSource(n, t);
+  }
+  if (CONFIG.videoProxy && !P.tried.has('stream')) {
+    P.tried.add('stream');
+    const d = P.srcs.find(x => x.kind === 'direct');
+    if (d) { P.srcs.push({ label: '原始檔（中轉串流）', url: streamUrl(d.url), kind: 'stream' }); return setSource(P.srcs.length - 1, t); }
+  }
+  failMsg(`這個瀏覽器不能播放 ${extOf(P.c.f.name).toUpperCase()} 格式`);
+}
+function failMsg(why) {
+  setMsg(`<i class="ti ti-alert-triangle" style="color:var(--danger)"></i><p>${esc(why)}</p>
+    <small>${CONFIG.videoProxy ? '轉碼也失敗了，可以下載後用 VLC 播放' : '設定轉碼中轉站後，avi、wmv、flv 等格式也能播；現在可以先下載用 VLC 播放'}</small>
+    <div class="hrow"><button class="btn primary" id="msgDl"><i class="ti ti-download"></i>下載影片</button>
+    <button class="btn" id="msgNext"><i class="ti ti-player-skip-forward"></i>下一支</button></div>`);
+  $('#msgDl').onclick = () => download(P.c);
+  $('#msgNext').onclick = () => playAt(P.i + 1);
+}
+vid.addEventListener('error', onVideoError);
+vid.addEventListener('waiting', () => { if (!vid.paused) setMsg('<div class="spinner"></div>'); });
+['playing', 'canplay', 'seeked'].forEach(t => vid.addEventListener(t, () => { if (!$('#vmsg .btn')) setMsg(''); }));
+vid.addEventListener('play', () => { $('#bigplay').hidden = true; syncPlay(); pokeUI(); });
+vid.addEventListener('pause', () => { syncPlay(); showUI(); saveNow(); });
+vid.addEventListener('timeupdate', () => {
+  syncTime();
+  if (Date.now() - P.saveT > 5000) { P.saveT = Date.now(); saveNow(); }
+});
+vid.addEventListener('progress', syncTime);
+vid.addEventListener('loadedmetadata', () => { syncTime(); if (P.c && !P.c.dur) saveProgress(P.c, 0, vid.duration); });
+vid.addEventListener('ended', () => {
+  saveNow(true);
+  if (P.loop) { vid.currentTime = 0; vid.play(); return; }
+  if (store('optAuto') !== '0' && P.i < P.s.clips.length - 1) playAt(P.i + 1);
+});
+vid.addEventListener('ratechange', syncSpeed);
+vid.addEventListener('volumechange', syncMute);
+function saveNow(ended) {
+  if (!P.c || !vid.duration || store('optResume') === '0') return;
+  saveProgress(P.c, ended ? vid.duration : vid.currentTime, vid.duration);
+}
+function syncPlay() {
+  $('#btnPlay').innerHTML = `<i class="ti ${vid.paused ? 'ti-player-play' : 'ti-player-pause'}"></i>`;
+  $('#btnPlay').dataset.tip = vid.paused ? '播放 (空白)' : '暫停 (空白)';
+}
+function syncTime() {
+  const d = vid.duration || 0, t = vid.currentTime || 0;
+  $('#tm').textContent = `${fmtTime(t)} / ${fmtTime(d)}`;
+  if (!P.seeking) $('#seek').value = d ? Math.round(t / d * 1000) : 0;
+  let b = 0;
+  for (let i = 0; i < vid.buffered.length; i++) if (vid.buffered.start(i) <= t + 1) b = Math.max(b, vid.buffered.end(i));
+  $('#seek').style.setProperty('--p', (d ? t / d * 100 : 0) + '%');
+  $('#seek').style.setProperty('--b', (d ? b / d * 100 : 0) + '%');
+}
+function syncMute() {
+  const v = vid.muted ? 0 : vid.volume;
+  $('#btnMute').innerHTML = `<i class="ti ${v === 0 ? 'ti-volume-3' : v < .5 ? 'ti-volume-2' : 'ti-volume'}"></i>`;
+  $('#vol').value = v;
+}
+function syncSpeed() { $('#btnSpeed').textContent = (Math.round(vid.playbackRate * 100) / 100) + '×'; }
+function togglePlay() { if (!P.c) return; vid.paused ? vid.play().catch(() => {}) : vid.pause(); }
+function skip(sec) {
+  if (!vid.duration) return;
+  vid.currentTime = Math.max(0, Math.min(vid.duration - 0.2, vid.currentTime + sec));
+  flashTag(`${sec > 0 ? '快轉' : '倒退'} ${Math.abs(sec)} 秒`);
+}
+function setRate(r) {
+  r = Math.max(0.25, Math.min(4, r));
+  vid.playbackRate = r; store('rate', String(r)); flashTag(`速度 ${r}×`);
+}
+function stepRate(dir) {
+  const i = SPEEDS.findIndex(x => x >= vid.playbackRate - 0.01);
+  setRate(SPEEDS[Math.max(0, Math.min(SPEEDS.length - 1, (i < 0 ? SPEEDS.length - 1 : i) + dir))]);
+}
+let tagT;
+function flashTag(t) {
+  const el = $('#speedtag'); el.textContent = t; el.hidden = false;
+  clearTimeout(tagT); tagT = setTimeout(() => { if (!P.holding) el.hidden = true; }, 900);
+}
+function setVolume(v) { vid.muted = v <= 0; vid.volume = Math.max(0, Math.min(1, v)); store('vol', String(vid.volume)); store('muted', vid.muted ? '1' : '0'); }
+
+/* 畫面縮放與平移 */
+function applyZoom() {
+  const w = stage.clientWidth, h = stage.clientHeight, z = P.zoom;
+  P.tx = Math.min(0, Math.max(w - w * z, P.tx));
+  P.ty = Math.min(0, Math.max(h - h * z, P.ty));
+  vid.style.transform = z === 1 ? '' : `translate(${P.tx}px,${P.ty}px) scale(${z})`;
+  stage.classList.toggle('grab', z > 1);
+  $('#btnZoomReset').textContent = Math.round(z * 100) + '%';
+}
+function setZoom(z, cx, cy) {
+  const r = stage.getBoundingClientRect();
+  z = Math.round(Math.min(5, Math.max(1, z)) * 100) / 100;
+  const px = (cx ?? r.left + r.width / 2) - r.left, py = (cy ?? r.top + r.height / 2) - r.top;
+  const ox = (px - P.tx) / P.zoom, oy = (py - P.ty) / P.zoom;
+  P.zoom = z;
+  P.tx = px - ox * z; P.ty = py - oy * z;
+  if (z === 1) { P.tx = 0; P.ty = 0; }
+  applyZoom();
+  flashTag(`畫面 ${Math.round(z * 100)}%`);
+}
+function resetZoom() { P.zoom = 1; P.tx = 0; P.ty = 0; applyZoom(); }
+function cycleFit() {
+  const ks = Object.keys(FITS); P.fit = ks[(ks.indexOf(P.fit) + 1) % ks.length];
+  vid.style.objectFit = P.fit; store('fit', P.fit); flashTag(FITS[P.fit]);
+}
+function toggleFull() {
+  const el = $('#player');
+  if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else if (el.requestFullscreen) el.requestFullscreen().then(() => { try { screen.orientation?.lock?.('landscape')?.catch(() => {}); } catch (e) {} }).catch(() => {});
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (vid.webkitEnterFullscreen) vid.webkitEnterFullscreen();
+}
+document.addEventListener('fullscreenchange', () => {
+  $('#btnFull').innerHTML = `<i class="ti ${document.fullscreenElement ? 'ti-minimize' : 'ti-maximize'}"></i>`;
+  setTimeout(applyZoom, 100);
+});
+async function togglePip() {
+  try {
+    if (document.pictureInPictureElement) await document.exitPictureInPicture();
+    else if (document.pictureInPictureEnabled) await vid.requestPictureInPicture();
+    else if (vid.webkitSetPresentationMode) vid.webkitSetPresentationMode('picture-in-picture');
+    else toast('這個瀏覽器不支援子母畫面', 'err');
+  } catch (e) { toast('無法開啟子母畫面', 'err'); }
+}
+
+/* 控制列自動隱藏 */
+function showUI() { $('#pwrap').classList.remove('hide-ui'); clearTimeout(P.uiT); }
+function pokeUI() {
+  showUI();
+  P.uiT = setTimeout(() => { if (!vid.paused && $('#popup').hidden && !P.seeking) $('#pwrap').classList.add('hide-ui'); }, 3000);
+}
+stage.addEventListener('mousemove', pokeUI);
+
+/* 進度條 */
+const seek = $('#seek');
+seek.addEventListener('input', () => {
+  P.seeking = true;
+  const d = vid.duration || 0;
+  $('#tm').textContent = `${fmtTime(seek.value / 1000 * d)} / ${fmtTime(d)}`;
+  seek.style.setProperty('--p', seek.value / 10 + '%');
+});
+seek.addEventListener('change', () => { if (vid.duration) vid.currentTime = seek.value / 1000 * vid.duration; P.seeking = false; pokeUI(); });
+$('#prog').addEventListener('mousemove', e => {
+  if (!vid.duration) return;
+  const r = seek.getBoundingClientRect(), x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+  const tip = $('#ptip'); tip.hidden = false; tip.style.left = x + 'px';
+  tip.textContent = fmtTime(x / r.width * vid.duration);
+});
+$('#prog').addEventListener('mouseleave', () => { $('#ptip').hidden = true; });
+
+/* 設定小視窗：速度、畫質、比例、循環 */
+function openPopup(kind) {
+  const pop = $('#popup');
+  if (!pop.hidden && pop.dataset.kind === kind) { pop.hidden = true; return; }
+  pop.dataset.kind = kind;
+  if (kind === 'speed') {
+    pop.innerHTML = '<h5>播放速度</h5>' + SPEEDS.map(s => `<button data-speed="${s}" class="${Math.abs(vid.playbackRate - s) < .01 ? 'on' : ''}">${s === 1 ? '正常' : s + '×'}</button>`).join('');
+  } else {
+    pop.innerHTML = `<h5>畫質／來源</h5>${P.srcs.map((s, i) => `<button data-src="${i}" class="${i === P.si ? 'on' : ''}">${esc(s.label)}</button>`).join('')}
+      ${CONFIG.videoProxy && !P.tried.has('tx') ? '<button data-tx="1">尋找轉碼版本…</button>' : ''}
+      <h5>畫面比例</h5>${Object.entries(FITS).map(([k, v]) => `<button data-fit="${k}" class="${P.fit === k ? 'on' : ''}">${v}</button>`).join('')}
+      <h5>其他</h5><button data-loop="1" class="${P.loop ? 'on' : ''}">單支循環</button>
+      <button data-zoom="1" class="hide-sm">還原畫面大小</button>`;
+  }
+  pop.hidden = false; showUI();
+}
+$('#popup').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.speed) setRate(+b.dataset.speed);
+  else if (b.dataset.src) setSource(+b.dataset.src, vid.currentTime);
+  else if (b.dataset.tx) { const n = P.srcs.length; await addVariants(P.c); if (P.srcs.length > n) setSource(n, vid.currentTime); else toast('沒有找到轉碼版本', 'err'); }
+  else if (b.dataset.fit) { P.fit = b.dataset.fit; vid.style.objectFit = P.fit; store('fit', P.fit); }
+  else if (b.dataset.loop) P.loop = !P.loop;
+  else if (b.dataset.zoom) resetZoom();
+  $('#popup').hidden = true; pokeUI();
+});
+
+/* 按鈕 */
+$('#btnPlay').onclick = togglePlay;
+$('#bigplay').onclick = togglePlay;
+$('#btnBack10').onclick = () => skip(-10);
+$('#btnFwd10').onclick = () => skip(10);
+$('#btnPrev').onclick = () => playAt(P.i - 1);
+$('#btnNext').onclick = () => playAt(P.i + 1);
+$('#btnMute').onclick = () => { vid.muted = !vid.muted; if (!vid.muted && vid.volume === 0) vid.volume = .5; store('muted', vid.muted ? '1' : '0'); };
+$('#vol').addEventListener('input', e => setVolume(+e.target.value));
+$('#btnSpeed').onclick = () => openPopup('speed');
+$('#btnMore').onclick = () => openPopup('more');
+$('#btnZoomIn').onclick = () => setZoom(P.zoom * 1.25);
+$('#btnZoomOut').onclick = () => setZoom(P.zoom / 1.25);
+$('#btnZoomReset').onclick = resetZoom;
+$('#btnFull').onclick = toggleFull;
+$('#btnPip').onclick = togglePip;
+$('#btnPClose').onclick = () => closePlayer();
+$('#btnPInfo').onclick = () => P.c && openInfo(P.c);
+$('#btnPl').onclick = () => openSheet(`<h3 class="sh-title">${esc(P.s.title)}</h3><ul class="flist pl-list">${(P.plItems || '')}</ul>`,
+  (act, i) => { if (act === 'pl') { playAt(i); closeSheet(); } });
+$('#plSide').addEventListener('click', e => { const b = e.target.closest('[data-act="pl"]'); if (b) playAt(+b.dataset.i); });
+document.addEventListener('click', e => { if (!e.target.closest('#popup,#btnSpeed,#btnMore')) $('#popup').hidden = true; });
+
+/* 畫面手勢：點一下、點兩下、雙指縮放、拖曳平移、長按 2 倍速、Ctrl+滾輪縮放 */
+(() => {
+  const pts = new Map();
+  let d0 = 0, z0 = 1, mid0 = null, drag = null, tapT = 0, lastTap = { t: 0, x: 0 }, holdT = 0, moved = false;
+  const dist = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  const mid = () => { const [a, b] = [...pts.values()]; return [(a.x + b.x) / 2, (a.y + b.y) / 2]; };
+  stage.addEventListener('pointerdown', e => {
+    if (e.target.closest('.ctrl,.mtop,.vmsg .btn,.bigplay')) return;
+    stage.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moved = false;
+    if (pts.size === 2) { clearTimeout(holdT); d0 = dist(); z0 = P.zoom; mid0 = mid(); drag = null; return; }
+    if (P.zoom > 1) { drag = { x: e.clientX, y: e.clientY, tx: P.tx, ty: P.ty }; stage.classList.add('grabbing'); }
+    else if (e.pointerType === 'touch' && !vid.paused) {
+      holdT = setTimeout(() => { P.holding = vid.playbackRate; vid.playbackRate = 2; const el = $('#speedtag'); el.textContent = '2× 快轉中'; el.hidden = false; }, 550);
+    }
+  });
+  stage.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    const p = pts.get(e.pointerId);
+    if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > 8) { moved = true; clearTimeout(holdT); }
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2 && d0) { const [x, y] = mid(); setZoom(z0 * dist() / d0, x, y); return; }
+    if (drag) { P.tx = drag.tx + e.clientX - drag.x; P.ty = drag.ty + e.clientY - drag.y; applyZoom(); }
+  });
+  const up = e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    clearTimeout(holdT);
+    stage.classList.remove('grabbing');
+    if (P.holding) { vid.playbackRate = P.holding; P.holding = 0; $('#speedtag').hidden = true; return; }
+    if (pts.size) return;
+    const wasPinch = d0; d0 = 0; drag = null;
+    if (moved || wasPinch || e.type === 'pointercancel') return;
+    const now = Date.now(), r = stage.getBoundingClientRect(), x = e.clientX - r.left;
+    if (now - lastTap.t < 300 && Math.abs(e.clientX - lastTap.x) < 60) {
+      clearTimeout(tapT); lastTap.t = 0;
+      if (e.pointerType === 'mouse') { toggleFull(); return; }
+      if (x < r.width * .38) { skip(-10); ripple('l', '« 10 秒'); }
+      else if (x > r.width * .62) { skip(10); ripple('r', '10 秒 »'); }
+      else setZoom(P.zoom > 1 ? 1 : 2, e.clientX, e.clientY);
+      return;
+    }
+    lastTap = { t: now, x: e.clientX };
+    tapT = setTimeout(() => {
+      if (e.pointerType === 'mouse') togglePlay();
+      else if ($('#pwrap').classList.contains('hide-ui')) pokeUI();
+      else if (!vid.paused) { $('#pwrap').classList.add('hide-ui'); }
+      else pokeUI();
+    }, e.pointerType === 'mouse' ? 220 : 280);
+  };
+  stage.addEventListener('pointerup', up);
+  stage.addEventListener('pointercancel', up);
+  stage.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault(); setZoom(P.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX, e.clientY);
+  }, { passive: false });
+  function ripple(side, text) {
+    const el = document.createElement('div'); el.className = 'ripple ' + side; el.textContent = text;
+    stage.appendChild(el); setTimeout(() => el.remove(), 600);
+  }
+})();
+addEventListener('resize', () => { closeKebab(); if ($('#player').classList.contains('open')) applyZoom(); });
+
+/* ===================== 主畫面事件 ===================== */
+$('#list').addEventListener('click', e => {
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'retry') return load();
+  if (act === 'upload') return openUpload();
+  const cur = S.series.find(x => x.id === S.open);
+  if (act === 'playall' && cur) return openPlayer(cur, 0);
+  if (act === 'cat' && cur) return openCat(cur);
+  if (act === 'zip' && cur) return downloadZip(cur);
+  const kb = e.target.closest('.kebab');
+  if (kb) { e.stopPropagation(); const c = S.byId.get(kb.dataset.id); showMenu(kb, c.label, clipItems(c)); return; }
+  const sk = e.target.closest('[data-skebab]');
+  if (sk) { e.stopPropagation(); const s = S.series.find(x => x.id === sk.dataset.skebab); showMenu(sk, s.title, seriesItems(s)); return; }
+  const op = e.target.closest('[data-open]');
+  if (op) return openSeries(op.dataset.open);
+  const ar = e.target.closest('.arrow');
+  if (ar) { const t = ar.parentElement.querySelector('.track'); t.scrollBy({ left: +ar.dataset.dir * t.clientWidth * 0.85 }); return; }
+  const card = e.target.closest('.card');
+  if (card) { const c = S.byId.get(card.dataset.id); if (c) openPlayer(c.s, c.idx); }
+});
+$('#list').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.classList.contains('card')) { const c = S.byId.get(e.target.dataset.id); if (c) openPlayer(c.s, c.idx); }
+});
+$('#chips').addEventListener('click', e => {
+  const b = e.target.closest('[data-region]'); if (!b || !S.loaded) return;
+  S.region = b.dataset.region;
+  if (S.open) { S.open = ''; if (history.state && history.state.open) history.replaceState(null, ''); }
+  render(); scrollTo({ top: 0 });
+});
+$('#viewSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-view]'); if (!b) return;
+  S.view = b.dataset.view; store('view', S.view); if (S.loaded) render();
+});
+$('#btnBack').onclick = closeSeries;
+document.addEventListener('click', e => { if (!e.target.closest('#kmenu') && !e.target.closest('.kebab,[data-skebab]')) closeKebab(); });
+addEventListener('scroll', closeKebab, { passive: true });
+
+/* 搜尋 */
+let qT;
+$('#q').addEventListener('input', e => { clearTimeout(qT); qT = setTimeout(() => { S.q = e.target.value; if (S.open) { S.open = ''; history.replaceState(null, ''); } if (S.loaded) render(); }, 150); });
+$('#btnSearch').onclick = () => { $('#topbar').classList.add('searching'); $('#q').focus(); };
+function closeSearch() {
+  $('#topbar').classList.remove('searching');
+  if ($('#q').value) { $('#q').value = ''; S.q = ''; if (S.loaded) render(); }
+}
+$('#btnSearchClose').onclick = closeSearch;
+
+/* 漢堡選單 */
+function openDrawer() {
+  $('#linkIn').value = S.link; updateCatHint();
+  $('#optAuto').checked = store('optAuto') !== '0';
+  $('#optResume').checked = store('optResume') !== '0';
+  $('#drawerOv').classList.add('open'); syncLock();
+}
+function closeDrawer() { $('#drawerOv').classList.remove('open'); syncLock(); }
+$('#btnMenu').onclick = openDrawer;
+$('#btnCloseDrawer').onclick = closeDrawer;
+$('#drawerOv').addEventListener('click', e => { if (e.target.id === 'drawerOv') closeDrawer(); });
+$('#btnUpload').onclick = openUpload;
+$('#btnUpload2').onclick = openUpload;
+$('#sortSeg').addEventListener('click', e => {
+  const b = e.target.closest('[data-sort]'); if (!b) return;
+  S.sort = b.dataset.sort; store('sort', S.sort); if (S.loaded) render();
+});
+$('#optAuto').onchange = e => store('optAuto', e.target.checked ? '1' : '0');
+$('#optResume').onchange = e => store('optResume', e.target.checked ? '1' : '0');
+$('#btnClearHist').onclick = () => {
+  if (!confirm('清除這台裝置上的觀看紀錄與播放位置？')) return;
+  store('watch', null); render(); toast('已清除觀看紀錄', 'ok');
+};
+$('#btnExportCat').onclick = () => {
+  const o = { ...CONFIG.catOverrides, ...localCats() };
+  if (!Object.keys(o).length) { toast('目前沒有自訂的分類'); return; }
+  copyText(JSON.stringify(o, null, 2), '已複製，貼到 CONFIG.catOverrides 即可');
+};
+$('#btnClearCat').onclick = () => {
+  if (!Object.keys(localCats()).length) { toast('目前沒有自訂的分類'); return; }
+  if (!confirm('把這台裝置上自訂的分類全部還原成自動判斷？')) return;
+  jset('catOverrides', {}); reclassify(); render(); updateCatHint(); toast('已全部還原', 'ok');
+};
+$('#btnReload').onclick = () => {
+  const v = $('#linkIn').value.trim();
+  try { parseLink(v); } catch (e) { toast('連結格式不正確：' + e.message, 'err'); return; }
+  S.link = v; S.open = ''; S.region = ''; store('pcloudLink', v); closeDrawer(); load();
+};
+
+/* 鍵盤 */
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input[type=text],input[type=search],input[type=url],input:not([type])')) return;
+  const playing = $('#player').classList.contains('open') && !$('#sheetOv').classList.contains('open');
+  if (e.key === 'Escape') {
+    if (!$('#popup').hidden) { $('#popup').hidden = true; return; }
+    if ($('#kmenu').classList.contains('open')) return closeKebab();
+    if ($('#sheetOv').classList.contains('open')) return closeSheet();
+    if (document.fullscreenElement) return;
+    if ($('#player').classList.contains('open')) return closePlayer();
+    if ($('#drawerOv').classList.contains('open')) return closeDrawer();
+    if ($('#topbar').classList.contains('searching')) return closeSearch();
+    if (S.open) return closeSeries();
+  }
+  if (!playing || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key, big = e.shiftKey ? 60 : 10;
+  const map = {
+    ' ': togglePlay, k: togglePlay, K: togglePlay,
+    ArrowLeft: () => skip(-big), ArrowRight: () => skip(big), j: () => skip(-10), l: () => skip(10),
+    ArrowUp: () => { setVolume((vid.muted ? 0 : vid.volume) + .05); flashTag(`音量 ${Math.round(vid.volume * 100)}%`); },
+    ArrowDown: () => { setVolume(vid.volume - .05); flashTag(`音量 ${Math.round(vid.volume * 100)}%`); },
+    m: () => $('#btnMute').click(), M: () => $('#btnMute').click(),
+    '<': () => stepRate(-1), ',': () => stepRate(-1), '>': () => stepRate(1), '.': () => stepRate(1),
+    '+': () => setZoom(P.zoom * 1.25), '=': () => setZoom(P.zoom * 1.25), '-': () => setZoom(P.zoom / 1.25), '_': () => setZoom(P.zoom / 1.25),
+    z: resetZoom, Z: resetZoom, a: cycleFit, A: cycleFit,
+    f: toggleFull, F: toggleFull, i: togglePip, I: togglePip,
+    n: () => playAt(P.i + 1), N: () => playAt(P.i + 1), b: () => playAt(P.i - 1), B: () => playAt(P.i - 1)
+  };
+  if (map[k]) { e.preventDefault(); map[k](); pokeUI(); return; }
+  if (/^[0-9]$/.test(k) && vid.duration) { e.preventDefault(); vid.currentTime = vid.duration * (+k) / 10; pokeUI(); }
+});
+addEventListener('pagehide', saveNow);
+
+/* ===================== 啟動 ===================== */
+(function init() {
+  document.title = CONFIG.siteTitle;
+  $('#siteTitle').textContent = CONFIG.siteTitle;
+  $('#footer').textContent = `${CONFIG.siteTitle} ${CONFIG.version} · 更新 ${CONFIG.updated}`;
+  if (!document.pictureInPictureEnabled && !vid.webkitSetPresentationMode) $('#btnPip').hidden = true;
+  S.link = new URLSearchParams(location.search).get('link') || store('pcloudLink') || CONFIG.shareLink;
+  S.sort = store('sort') || 'name';
+  S.view = store('view') || 'rows';
+  history.replaceState(null, '');
+  load();
+})();
+</script>
+</body>
+</html>
