@@ -327,7 +327,7 @@ footer{text-align:center;color:var(--faint);font-size:12px;padding:0 16px 30px;p
     <div class="dr-body">
       <div class="dr-sec">
         <button class="btn primary" id="btnUpload2" style="width:100%"><i class="ti ti-cloud-upload"></i>上傳影片</button>
-        <p>上傳的影片會先放在「待整理」，每月 1 號自動歸到對應的國家。</p>
+        <p>上傳的影片會先放在最上方的「新上傳區」，每月 1 號整理後再歸到對應的國家。</p>
       </div>
       <div class="dr-sec">
         <h4>排序方式</h4>
@@ -493,11 +493,13 @@ const CONFIG = {
     ['Rhona Mitra', '英國', /Rhona Mitra/i],
     ['Ludivine Sagnier', '法國', /Ludivine Sagnier/i]
   ],
-  regionOrder: ['華語', '日韓', '東南亞', '南亞', '歐洲', '美洲', '大洋洲', '全球合輯', '未分類', '待整理'],
+  regionOrder: ['新上傳區', '華語', '日韓', '東南亞', '南亞', '歐洲', '美洲', '大洋洲', '全球合輯', '未分類', '待整理'],
   // 固定的分類對照：'資料夾名稱': '地區/國家'。網頁上改過後可用選單「匯出對照」貼到這裡
   catOverrides: {},
-  inbox: /^待整理|^Files from /,
-  version: 'v1.2.0',
+  inbox: /^待整理/,
+  // 從網站上傳的檔案（pCloud 檔案請求資料夾）→ 新上傳區，每月整理後才歸類
+  newUpload: /^Files from (?!VideoSpaceConvert)/i,
+  version: 'v1.3.0',
   updated: '2026-10-21'
 };
 
@@ -651,6 +653,7 @@ function buildLibrary(meta) {
       else if (/^conv_\d+\.mp4$/i.test(c.name)) continue;
       else if (isVid(c)) vids.push(c);
     }
+    if (path.length && CONFIG.newUpload.test(path[0])) { fresh.push(...vids); return; }
     if (path.length) return add(path, node.folderid, vids);
     // 根目錄：「演員 - 片名」依演員分組，其他留在待整理
     const groups = new Map(), inbox = [];
@@ -660,10 +663,12 @@ function buildLibrary(meta) {
       else inbox.push(f);
     }
     for (const [name, g] of groups) add(['演員：' + name], node.folderid, g.vids, { country: g.p[1] }, name);
-    add([], node.folderid, inbox);
+    fresh.push(...inbox);
   };
+  const fresh = [];
   if (meta.isfolder) walk(meta, []);
   else walk({ contents: [meta] }, []);
+  add(['新上傳區'], meta.folderid, fresh, { region: '新上傳區', country: '新上傳區' }, '新上傳區（每月整理後歸類）');
   // 原檔已轉檔但被藏起來時，conv 檔仍可能落單：上面已處理；這裡不需額外動作
   return { series, clips };
 }
@@ -671,6 +676,7 @@ function catOf(s) {
   const ov = catFor(s.key);
   let r;
   if (ov) { const [a, b] = ov.split('/'); r = { region: a || '未分類', country: b || a || '未分類' }; }
+  else if (s.forced && s.forced.region) r = { region: s.forced.region, country: s.forced.country };
   else if (s.forced) r = { region: (CONFIG.countries.find(x => x[0] === s.forced.country) || [, '未分類'])[1], country: s.forced.country };
   else r = classify(s.path);
   return { ...r, title: s.fixedTitle || (s.path.length ? seriesTitle(s.folder, r.country) : '新上傳（待整理）') };
@@ -749,7 +755,7 @@ function render() {
   const total = rs.reduce((n, r) => n + r.count, 0);
   if (S.region && !rs.some(r => r.name === S.region)) S.region = '';
   $('#chips').innerHTML = `<button class="chip ${S.region ? '' : 'on'}" data-region="">全部 <small>${total}</small></button>` +
-    rs.map(r => `<button class="chip ${S.region === r.name ? 'on' : ''} ${r.name === '待整理' ? 'warn' : ''}" data-region="${esc(r.name)}">${esc(r.name)} <small>${r.count}</small></button>`).join('');
+    rs.map(r => `<button class="chip ${S.region === r.name ? 'on' : ''} ${r.name === '新上傳區' || r.name === '待整理' ? 'warn' : ''}" data-region="${esc(r.name)}">${esc(r.name)} <small>${r.count}</small></button>`).join('');
   $('#chips .chip.on')?.scrollIntoView({ inline: 'center', block: 'nearest' });
   document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === S.view));
   document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === S.sort));
@@ -763,7 +769,7 @@ function render() {
     $('#stats').innerHTML = `<b>${esc(s.title)}</b> · ${esc(s.region)} / ${esc(s.country)} · ${s.clips.length} 支`;
     $('#list').innerHTML = `<div class="hrow" style="margin-bottom:14px;flex-wrap:wrap">
         <button class="btn primary" data-act="playall" style="flex:none"><i class="ti ti-player-play"></i>從頭播放</button>
-        <button class="btn" data-act="cat" style="flex:none"><i class="ti ti-map-pin"></i>變更分類</button>
+        ${s.region === '新上傳區' ? '' : '<button class="btn" data-act="cat" style="flex:none"><i class="ti ti-map-pin"></i>變更分類</button>'}
         <button class="btn" data-act="zip" style="flex:none"><i class="ti ti-download"></i>下載整包</button></div>
       <div class="grid">${sortClips(s.clips).map(c => cardHTML(c, false)).join('')}</div>`;
     return;
@@ -857,7 +863,7 @@ function seriesItems(s) {
   return [
     ['ti-player-play', '從頭播放', () => openPlayer(s, 0)],
     ['ti-list-details', '打開系列', () => openSeries(s.id)],
-    ['ti-map-pin', '變更分類', () => openCat(s)],
+    ...(s.region === '新上傳區' ? [] : [['ti-map-pin', '變更分類', () => openCat(s)]]),
     ['ti-download', '下載整包 ZIP', () => downloadZip(s)]
   ];
 }
@@ -991,7 +997,7 @@ function openUpload() {
     <ul class="ulist" id="ulist">${UP.queue.map(uItem).join('')}</ul>
     ${UP.queue.length ? `<div class="sh-actions">${UP.busy ? '<button class="btn" data-act="stop"><i class="ti ti-player-stop"></i>停止</button>' : '<button class="btn" data-act="clear"><i class="ti ti-trash"></i>清空清單</button>'}
       <button class="btn primary" data-act="reload"><i class="ti ti-refresh"></i>完成並重新整理</button></div>` : ''}
-    <p class="note">影片會上傳到 pCloud 資料夾最上層，網站上顯示在「待整理」。每月 1 號會自動依國家歸類，你也可以先在系列選單「變更分類」。<br>大檔案請用 Wi-Fi，上傳時不要關閉這個頁面。</p>
+    <p class="note">上傳的影片會先放在網站最上方的「新上傳區」，每月 1 號整理時再依國家歸到分類。<br>大檔案請用 Wi-Fi，上傳時不要關閉這個頁面。</p>
     <a class="btn" href="${esc(S.link)}" target="_blank" rel="noopener" style="width:100%;margin-top:10px"><i class="ti ti-cloud"></i>改到 pCloud 網頁上傳</a>`;
   openSheet(html(), act => {
     if (act === 'pick') $('#fileIn').click();
