@@ -436,12 +436,12 @@ const CONFIG = {
   siteTitle: '我的影視空間',
   // 上傳用代碼：留空就用上面公開連結的 code（這個資料夾連結已開放上傳）
   // 如果上傳失敗，到 pCloud 建立「上傳連結」，把它的 code 貼在這裡
-  uploadCode: '',
+  uploadCode: '6h37ZzkAwojqufhysoiKXMdWqPhyvgxD7',
   // 影片轉碼中轉站（Cloudflare Worker 網址）。填了之後 avi、wmv、flv 等瀏覽器不支援的格式也能播
   videoProxy: 'https://pcloud-video.sunny-f0b.workers.dev',
   // 不顯示的檔案與資料夾
-  exclude: /\.(txt|nfo|url|db|ini|ds_store|rar|zip|7z|torrent|srt|ass|ssa|jpg|jpeg|png|gif|webp|bmp)$/i,
-  hide: /性愛|自拍|破解|流出|外流|偷拍|偷窺|私密影|艷照|艳照|edc|陳冠希|獸獸|兽兽|做愛|做爱|小旅館|^待你處理$|^重複備份$/i,
+  exclude: /\.(txt|nfo|url|db|ini|ds_store|rar|zip|7z|torrent|srt|ass|ssa|jpg|jpeg|png|gif|webp|bmp|dat|htm|html|pdf)$/i,
+  hide: /性愛|自拍|破解|流出|外流|偷拍|偷窺|私密影|艷照|艳照|edc|陳冠希|獸獸|兽兽|做愛|做爱|小旅館|^My eBooks$|^Sample$|^已轉檔原始檔$|^待你處理$|^重複備份$/i,
   // 國家 → 地區（依資料夾名稱自動判斷，可自行增加）
   countries: [
     ['中港台', '華語', /中港台|港台|華語|华语/],
@@ -467,14 +467,37 @@ const CONFIG = {
     ['加拿大', '美洲', /加拿大|canada/i],
     ['拉丁美洲', '美洲', /巴西|墨西哥|阿根廷|拉丁|brazil|mexico/i],
     ['澳洲', '大洋洲', /澳洲|澳大利亞|australia/i],
+    ['台灣', '華語', /樓下的房客|Tenants\.?Downstairs/i],
+    ['香港', '華語', /叶玉卿|葉玉卿|魔唇劫|三级|三級/],
+    ['美國', '美洲', /Sydney Sweeney|亢奮|Euphoria/i],
     ['歐洲綜合', '歐洲', /歐洲|欧洲|europe/i],
     ['全球精選', '全球合輯', /全球|世界|國際|国际|global|world/i]
+  ],
+  // 根目錄「演員 - 片名」檔案：依演員歸成系列 [顯示名稱, 國家, 比對檔名]
+  people: [
+    ['廣末涼子', '日本', /Hirosue Ryoko|廣末涼子/i],
+    ['宋智孝', '韓國', /Song Ji Hyo|宋智孝/i],
+    ['林智妍', '韓國', /Lim Ji Yeon|林智妍/i],
+    ['李麗珍', '香港', /Loletta Lee|李麗珍/i],
+    ['蜜桃成熟時33D', '香港', /蜜桃成熟時33D/i],
+    ['莫小棋', '中國', /Monica Mok|莫小棋/i],
+    ['湯唯', '中國', /Tang Wei|湯唯/i],
+    ['孫安可', '台灣', /Anke Sun|孫安可/i],
+    ['樓下的房客', '台灣', /樓下的房客|Xing Li|Yu-Wei Shao/i],
+    ['Amanda Seyfried', '美國', /Amanda Seyfried/i],
+    ['Anne Hathaway', '美國', /Anne Hathaway/i],
+    ['Elizabeth Olsen', '美國', /Elizabeth Olsen/i],
+    ['Scarlett Johansson', '美國', /Scarlett Johansson/i],
+    ['Alexandra Daddario', '美國', /Alexandra Daddario|妲妲里奧/i],
+    ['Alice Eve', '英國', /Alice Eve|艾莉絲伊芙/i],
+    ['Rhona Mitra', '英國', /Rhona Mitra/i],
+    ['Ludivine Sagnier', '法國', /Ludivine Sagnier/i]
   ],
   regionOrder: ['華語', '日韓', '東南亞', '南亞', '歐洲', '美洲', '大洋洲', '全球合輯', '未分類', '待整理'],
   // 固定的分類對照：'資料夾名稱': '地區/國家'。網頁上改過後可用選單「匯出對照」貼到這裡
   catOverrides: {},
-  inbox: /^待整理/,
-  version: 'v1.0.3',
+  inbox: /^待整理|^Files from /,
+  version: 'v1.2.0',
   updated: '2026-10-21'
 };
 
@@ -581,6 +604,8 @@ function classify(path) {
   return { region: '未分類', country: '未分類' };
 }
 function seriesTitle(name, country) {
+  const rel = name.match(/^(.+?)[._ ]((?:19|20)\d{2})[._ ].*(?:720p|1080p|2160p|BluRay|WEB|HDTV|x26[45])/i);
+  if (rel) return `${rel[1].replace(/[._]+/g, ' ').trim()} (${rel[2]})`;
   let t = name.replace(/^[\w.-]*@[\w.-]+?\./, '').replace(/^[\w-]+@\S+\s*/, '').trim();
   const stripped = t.replace(new RegExp(country, 'g'), '').replace(/^[\s\-–—·・_]+|[\s\-–—·・_]+$/g, '').trim();
   return stripped || (t === country ? country + '精選' : t) || name;
@@ -593,41 +618,65 @@ function clipLabel(f, i) {
 }
 function buildLibrary(meta) {
   const series = [], clips = [];
-  const walk = (node, path) => {
-    const vids = [];
-    for (const c of node.contents || []) {
-      if (CONFIG.hide.test(c.name)) continue;
-      if (c.isfolder) walk(c, [...path, c.name.trim()]);
-      else if (!CONFIG.exclude.test(c.name) && (c.category === 2 || RX_VID.test(c.name) || (c.contenttype || '').startsWith('video/'))) vids.push(c);
-    }
+  // 轉好的 conv_<fileid>.mp4 → 接回原檔
+  const conv = new Map();
+  const scan = n => { for (const c of n.contents || []) { if (c.isfolder) scan(c); else { const m = c.name.match(/^conv_(\d+)\.mp4$/i); if (m) conv.set(m[1], c); } } };
+  scan(meta.isfolder ? meta : { contents: [meta] });
+  const isVid = c => !CONFIG.exclude.test(c.name) && (c.category === 2 || RX_VID.test(c.name) || (c.contenttype || '').startsWith('video/'));
+  const add = (path, folderid, vids, forced, title) => {
     if (!vids.length) return;
     vids.sort((a, b) => coll.compare(a.name, b.name));
-    const { region, country } = classify(path);
-    const name = path.length ? path[path.length - 1] : '待整理';
-    const s = {
-      id: 's' + series.length, key: path.join('/') || '(根目錄)', folder: name, path, region, country,
-      title: path.length ? seriesTitle(name, country) : '新上傳（待整理）',
-      folderid: node.folderid, clips: [],
-      modified: Math.max(...vids.map(f => Date.parse(f.modified) || 0))
-    };
+    const key = path.join('/') || '(根目錄)';
+    const s = { id: 's' + series.length, key, folder: path[path.length - 1] || '待整理', path, forced, fixedTitle: title, folderid, clips: [] };
+    Object.assign(s, catOf(s));
+    s.modified = Math.max(...vids.map(f => Date.parse(f.modified) || 0));
     vids.forEach((f, i) => {
+      const cv = conv.get(String(f.fileid));
+      const play = cv || f;
+      let label = clipLabel(f, i);
+      if (title && / - /.test(f.name)) label = f.name.replace(/\.[^.]+$/, '').split(' - ').slice(1).join(' - ').trim() || label;
       const c = {
-        id: 'c' + f.fileid, f, s, idx: i, label: clipLabel(f, i),
-        dur: +f.duration || +(jget('durs', {})[f.fileid] || 0), modified: Date.parse(f.modified) || 0
+        id: 'c' + play.fileid, f: play, orig: cv ? f : null, s, idx: i, label,
+        dur: +play.duration || +(jget('durs', {})[play.fileid] || 0), modified: Date.parse(f.modified) || 0
       };
       s.clips.push(c); clips.push(c);
     });
     series.push(s);
   };
+  const walk = (node, path) => {
+    const vids = [];
+    for (const c of node.contents || []) {
+      if (CONFIG.hide.test(c.name)) continue;
+      if (c.isfolder) walk(c, [...path, c.name.trim()]);
+      else if (/^conv_\d+\.mp4$/i.test(c.name)) continue;
+      else if (isVid(c)) vids.push(c);
+    }
+    if (path.length) return add(path, node.folderid, vids);
+    // 根目錄：「演員 - 片名」依演員分組，其他留在待整理
+    const groups = new Map(), inbox = [];
+    for (const f of vids) {
+      const p = CONFIG.people.find(x => x[2].test(f.name));
+      if (p) { if (!groups.has(p[0])) groups.set(p[0], { p, vids: [] }); groups.get(p[0]).vids.push(f); }
+      else inbox.push(f);
+    }
+    for (const [name, g] of groups) add(['演員：' + name], node.folderid, g.vids, { country: g.p[1] }, name);
+    add([], node.folderid, inbox);
+  };
   if (meta.isfolder) walk(meta, []);
   else walk({ contents: [meta] }, []);
+  // 原檔已轉檔但被藏起來時，conv 檔仍可能落單：上面已處理；這裡不需額外動作
   return { series, clips };
 }
+function catOf(s) {
+  const ov = catFor(s.key);
+  let r;
+  if (ov) { const [a, b] = ov.split('/'); r = { region: a || '未分類', country: b || a || '未分類' }; }
+  else if (s.forced) r = { region: (CONFIG.countries.find(x => x[0] === s.forced.country) || [, '未分類'])[1], country: s.forced.country };
+  else r = classify(s.path);
+  return { ...r, title: s.fixedTitle || (s.path.length ? seriesTitle(s.folder, r.country) : '新上傳（待整理）') };
+}
 function reclassify() {
-  for (const s of S.series) {
-    const r = classify(s.path); s.region = r.region; s.country = r.country;
-    s.title = s.path.length ? seriesTitle(s.folder, s.country) : '新上傳（待整理）';
-  }
+  for (const s of S.series) Object.assign(s, catOf(s));
 }
 
 /* ===================== 觀看紀錄 ===================== */
@@ -915,7 +964,7 @@ $('#sheetBody').addEventListener('click', e => {
 function openInfo(c) {
   const f = c.f;
   const rows = [
-    ['片名', c.label], ['系列', c.s.title], ['分類', c.s.region + ' / ' + c.s.country], ['檔名', f.name],
+    ['片名', c.label], ['系列', c.s.title], ['分類', c.s.region + ' / ' + c.s.country], ['檔名', c.orig ? `${c.orig.name}（已轉成 MP4）` : f.name],
     ['格式', extOf(f.name).toUpperCase() + (f.videocodec ? ` · ${f.videocodec}${f.audiocodec ? ' / ' + f.audiocodec : ''}` : '')],
     f.width && ['解析度', `${f.width} × ${f.height}${f.fps ? ' · ' + f.fps + ' fps' : ''}`],
     c.dur && ['長度', fmtTime(c.dur)], ['大小', fmtSize(f.size)], ['更新日期', fmtDate(f.modified)]
@@ -1059,6 +1108,7 @@ async function playAt(i, keepTime) {
   renderPlaylist();
   resetZoom();
   P.srcs = []; P.si = 0; P.tried = new Set(); P.startAt = keepTime ?? null;
+  if (!RX_NATIVE.test(c.f.name)) return failMsg(`${extOf(c.f.name).toUpperCase()} 格式正在排隊轉檔`, true);
   setMsg('<div class="spinner"></div><p>載入中…</p>');
   try {
     const direct = { label: '原始檔', url: await fileLink(c.f), kind: 'direct' };
@@ -1112,11 +1162,11 @@ async function onVideoError() {
   }
   failMsg(`網頁無法播放 ${extOf(P.c.f.name).toUpperCase()} 格式`);
 }
-function failMsg(why) {
+function failMsg(why, queued) {
   $('#bigplay').hidden = true;
   const real = /\.(rmvb|rm)$/i.test(P.c.f.name);
   setMsg(`<i class="ti ti-alert-triangle" style="color:var(--danger)"></i><p>${esc(why)}</p>
-    <small>${real ? 'RMVB 是 RealMedia 舊格式，瀏覽器和 pCloud 都不支援轉碼。請下載後用 VLC 播放，或先用 HandBrake 轉成 MP4 再上傳' : CONFIG.videoProxy ? '轉碼也失敗了，可以下載後用 VLC 播放' : '設定轉碼中轉站後，avi、wmv、flv 等格式也能播；現在可以先下載用 VLC 播放'}</small>
+    <small>${queued ? '瀏覽器不支援這個舊格式。轉檔程式會把它轉成 MP4，轉好後這裡就能直接播放（含快轉、縮放）。急著看可以先下載用 VLC 播放' : real ? 'RMVB 是 RealMedia 舊格式，瀏覽器和 pCloud 都不支援轉碼。請下載後用 VLC 播放，或先用 HandBrake 轉成 MP4 再上傳' : CONFIG.videoProxy ? '轉碼也失敗了，可以下載後用 VLC 播放' : '設定轉碼中轉站後，avi、wmv、flv 等格式也能播；現在可以先下載用 VLC 播放'}</small>
     <div class="hrow"><button class="btn primary" id="msgDl"><i class="ti ti-download"></i>下載影片</button>
     <button class="btn" id="msgNext"><i class="ti ti-player-skip-forward"></i>下一支</button></div>`);
   $('#msgDl').onclick = () => download(P.c);
